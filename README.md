@@ -16,7 +16,7 @@ This repo will fill up with all kinds of random, cool stuff:
 - 💻 Algorithms & coding challenges
 - 📱 Web apps & interactive tools
 - 🤖 AI & generative art
-- ⚙️ Whatever else I feel like hacking on
+- ⚙️ Whatever else I feel like working on
 
 Check out the folders — each one is a standalone project.
 
