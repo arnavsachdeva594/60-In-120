@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { OpenAI } = require('openai'); // Updated import based on the latest OpenAI Node.js SDK
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -10,45 +10,39 @@ app.use(express.json());
 
 // 💥 Rate limiter: max 5 requests per minute per IP
 const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute window
-  max: 5, // Limit each IP to 5 requests per windowMs
+  windowMs: 60 * 1000,
+  max: 5,
   message: 'Too many requests from this IP, please try again after a minute',
 });
 app.use(limiter);
 
-// Initialize OpenAI API client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2';
+const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
 app.post('/generate-card', async (req, res) => {
   try {
-    // Extract user prompt or use default prompt
     const userPrompt = req.body.prompt || 'Generate a unique fantasy creature name and short backstory.';
-    
-    // Generate a backstory using GPT-3.5 or GPT-4 model (text-davinci-003 is old; newer models are recommended)
-    const gptResponse = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // or 'gpt-4' depending on your access
-      messages: [{ role: 'user', content: userPrompt }],
-    });
 
-    const nameAndBackstory = gptResponse.choices[0].message.content.trim();
-    
-    // Create a DALL·E prompt for generating an image based on the generated backstory
-    const dallePrompt = `digital art, fantasy creature, ${nameAndBackstory.split('.')[0]}`;
-    const dalleResponse = await openai.images.create({
-      prompt: dallePrompt,
-      n: 1,
-      size: '512x512', // You can also choose different sizes like '1024x1024'
-    });
+    // Here you can skip GPT generation or replace it with a static name
+    const nameAndBackstory = userPrompt;
 
-    // Send back the generated name, backstory, and image URL
+    // Call Hugging Face image API
+    const response = await axios.post(
+      HUGGINGFACE_API_URL,
+      { inputs: nameAndBackstory },
+      { headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` }, responseType: 'arraybuffer' }
+    );
+
+    // Convert binary image to base64
+    const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+    const imageUrl = `data:image/png;base64,${imageBase64}`;
+
     res.json({
       nameAndBackstory,
-      imageUrl: dalleResponse.data[0].url,
+      imageUrl,
     });
   } catch (error) {
-    console.error(error.response || error);
+    console.error(error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to generate card' });
   }
 });
