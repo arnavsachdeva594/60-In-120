@@ -10,7 +10,6 @@
         <!-- Navigation Menu -->
         <nav class="w-full max-w-md text-center mb-8">
             <a href="index.html" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">Simulator</a>
-            <a href="about.html" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">About Langton's Ant</a>
             <a href="https://github.com/yourusername/your-repo" target="_blank" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">GitHub</a>
         </nav>
 
@@ -31,6 +30,24 @@
         <footer class="mt-8 text-center text-gray-500">
             <a href="https://github.com/yourusername/your-repo" target="_blank" class="underline hover:text-gray-700">View on GitHub</a>
         </footer>
+
+        <button id="toggleDark" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded m-2 mt-4">Dark Mode</button>
     </div>
+
+    <script>
+        const toggleDark = document.getElementById('toggleDark');
+        let isDarkMode = false;
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('bg-gray-900', isDarkMode);
+            document.body.classList.toggle('bg-gray-100', !isDarkMode);
+            document.body.classList.toggle('text-gray-100', isDarkMode);
+            document.body.classList.toggle('text-gray-900', !isDarkMode);
+            toggleDark.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+        }
+
+        toggleDark.addEventListener('click', toggleDarkMode);
+    </script>
 </body>
 </html>
