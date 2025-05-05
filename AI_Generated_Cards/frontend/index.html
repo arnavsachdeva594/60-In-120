@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Card Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>AI Generated Fantasy Cards</h1>
+    <nav>
+      <a href="index.html">Home</a> | 
+      <a href="about.html">About Langton's Ant</a> | 
+      <a href="https://github.com/yourusername/ai-card-generator" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <div>
+      <label for="prompt-input">Enter prompt:</label>
+      <input type="text" id="prompt-input" placeholder="Enter prompt for AI card generation" />
+      <button id="generate">Generate Card</button>
+    </div>
+
+    <div id="card">
+      <h2 id="card-name">Card Name</h2>
+      <p id="card-description">Card Description</p>
+      <img id="card-image" alt="Generated card image" />
+      <button id="download">Download Card</button>
+    </div>
+
+    <div id="gallery"></div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 AI Card Generator | Created with OpenAI</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
