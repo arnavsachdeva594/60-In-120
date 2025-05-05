@@ -1,43 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Generated Cards</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Generated Cards</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>AI Generated Cards</h1>
-    <button id="darkModeToggle">Toggle Dark Mode</button>
-  </header>
+    <div class="container">
+        <header>
+            <h1>AI Generated Cards</h1>
+            <button class="toggle-dark-mode" id="darkModeBtn">🌙</button>
+        </header>
+        
+        <section class="card-generation-form">
+            <h2>Create Your Card</h2>
+            <label for="prompt">Fantasy Creature Name & Description</label>
+            <textarea id="prompt" placeholder="Describe your creature..."></textarea>
 
-  <div class="content">
-    <h2>Create Your Fantasy Creature Card</h2>
-    <form id="generateCardForm">
-      <label for="nameInput">Enter a Name:</label>
-      <input type="text" id="nameInput" placeholder="Creature name" required>
-      
-      <label for="backstoryInput">Enter Backstory:</label>
-      <textarea id="backstoryInput" placeholder="Short backstory" required></textarea>
-      
-      <button type="submit">Generate Card</button>
-    </form>
+            <label for="backstory">Backstory Prompt</label>
+            <textarea id="backstory" placeholder="Give me a backstory for this creature..."></textarea>
 
-    <div id="cardContainer" class="card-container">
-      <h3>Your Generated Card:</h3>
-      <div id="card" class="card">
-        <img id="cardImage" src="" alt="Card Image" style="max-width: 100%; height: auto;">
-        <h4 id="cardName"></h4>
-        <p id="cardBackstory"></p>
-      </div>
+            <button id="generateCardBtn">Generate Card</button>
+        </section>
+
+        <section class="result">
+            <h2>Generated Card</h2>
+            <div id="cardResult"></div>
+        </section>
     </div>
-  </div>
 
-  <footer>
-    <p>AI Generated Cards - Powered by OpenAI and HuggingFace</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
