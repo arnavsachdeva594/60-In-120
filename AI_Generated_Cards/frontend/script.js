@@ -1,35 +1,41 @@
-const generateCardButton = document.getElementById('generateCard');
-const cardPrompt = document.getElementById('cardPrompt');
-const generatedCard = document.getElementById('generatedCard');
-const cardName = document.getElementById('cardName');
-const cardBackstory = document.getElementById('cardBackstory');
-const cardImage = document.getElementById('cardImage');
+// Grab the dark mode button
+const darkModeButton = document.getElementById('darkModeToggle');
 
-// Generate Card Function
-generateCardButton.addEventListener('click', async () => {
-  const prompt = cardPrompt.value || 'Generate a unique fantasy creature name and short backstory.';
+// Check if dark mode is already active and apply it
+if (localStorage.getItem('darkMode') === 'enabled') {
+  document.body.classList.add('dark-mode');
+}
 
-  try {
-    const response = await fetch('/generate-card', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt }),
-    });
+// Function to toggle dark mode
+darkModeButton.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
 
-    const data = await response.json();
-
-    if (data.error) {
-      alert('Failed to generate card');
-    } else {
-      cardName.textContent = data.nameAndBackstory.split('.')[0];
-      cardBackstory.textContent = data.nameAndBackstory.split('.')[1] || 'No backstory provided.';
-      cardImage.src = data.imageUrl;
-      generatedCard.style.display = 'block';
-    }
-  } catch (error) {
-    console.error(error);
-    alert('Failed to generate card');
+  // Store the dark mode preference in localStorage
+  if (document.body.classList.contains('dark-mode')) {
+    localStorage.setItem('darkMode', 'enabled');
+  } else {
+    localStorage.setItem('darkMode', 'disabled');
   }
+});
+
+// Function to generate the card (fake example for now)
+document.getElementById('generateCardForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  // Get user input
+  const name = document.getElementById('nameInput').value;
+  const backstory = document.getElementById('backstoryInput').value;
+
+  // Replace with an actual API call to generate the card (placeholder for now)
+  const cardName = name || 'Mystical Beast';
+  const cardBackstory = backstory || 'A mysterious creature with untold power.';
+  const cardImage = 'https://placeimg.com/400/300/animals';  // Placeholder image
+
+  // Display the generated card
+  document.getElementById('cardName').innerText = cardName;
+  document.getElementById('cardBackstory').innerText = cardBackstory;
+  document.getElementById('cardImage').src = cardImage;
+
+  // Show the card container
+  document.getElementById('cardContainer').style.display = 'block';
 });
