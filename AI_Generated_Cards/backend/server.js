@@ -16,7 +16,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/prompthero/openjourney';
+const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/stabilityai/sdxl-turbo';
 
 async function generateImage(prompt) {
   try {
@@ -25,7 +25,7 @@ async function generateImage(prompt) {
       { inputs: prompt },
       {
         headers: {
-          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
         },
         responseType: 'arraybuffer',
       }
