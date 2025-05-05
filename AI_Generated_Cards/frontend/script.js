@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://your-backend-app.onrender.com'; // <-- Your Render URL
+const BACKEND_URL = 'https://six0-in-120.onrender.com'; // <-- Your Render URL
 
 const promptInput = document.getElementById('prompt-input');
 const generateBtn = document.getElementById('generate');
