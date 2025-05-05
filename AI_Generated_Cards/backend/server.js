@@ -16,10 +16,10 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Hugging Face API URL for Stable Diffusion model
-const HF_MODEL_URL = 'https://hf.space/api/predict/';  // Correct endpoint
+// Hugging Face Inference API URL for Stable Diffusion model
+const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2';
 
-// Make sure to use your Hugging Face API token
+// Hugging Face API Token
 const HF_API_TOKEN = process.env.HF_API_TOKEN;
 
 async function generateImage(prompt) {
@@ -27,8 +27,8 @@ async function generateImage(prompt) {
     const response = await axios.post(
       HF_MODEL_URL,
       {
-        // Correct structure based on Hugging Face Space's required format
-        data: [prompt],  
+        // The correct structure based on Hugging Face Inference API
+        inputs: prompt, // Prompt to generate the image from
       },
       {
         headers: {
@@ -37,8 +37,8 @@ async function generateImage(prompt) {
       }
     );
 
-    // Extract the image URL from the response (adjust if needed)
-    const imageUrl = response.data.data[0]; // Response may vary, check Hugging Face response
+    // Extract the image URL from the response
+    const imageUrl = response.data.url; // This may vary, based on the API response
     return imageUrl;
   } catch (error) {
     console.error('Hugging Face API error:', error.response?.data || error.message);
