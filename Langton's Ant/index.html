@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>Langton's Ant Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
-        }
-        canvas {
-            border: 1px solid #333;
-            background-color: #fff;
-        }
-        .controls {
-            margin: 10px;
-        }
-        .controls label {
-            margin: 0 10px;
-        }
+        canvas { border: 1px solid #333; }
     </style>
 </head>
-<body>
-    <h1>Langton's Ant Simulator</h1>
-    <div class="controls">
-        <label>Grid Size: <input type="range" id="gridSize" min="50" max="500" value="200"></label>
-        <label>Cell Size: <input type="range" id="cellSize" min="1" max="10" value="2"></label>
-        <label>Speed (ms): <input type="range" id="speed" min="1" max="200" value="10"></label>
-        <button id="startBtn">Start</button>
-        <button id="pauseBtn">Pause</button>
-        <button id="resetBtn">Reset</button>
+<body class="bg-gray-100">
+    <div class="flex flex-col items-center justify-center min-h-screen">
+        <h1 class="text-4xl font-bold mb-6 text-indigo-600">Langton's Ant Simulator</h1>
+
+        <canvas id="canvas" class="transition-opacity duration-700 opacity-0 mb-6"></canvas>
+
+        <div class="w-full max-w-md mb-4">
+            <label class="block mb-1 font-semibold">Grid Size: <span id="gridSizeLabel">120</span></label>
+            <input type="range" id="gridSize" min="50" max="500" value="120" class="w-full">
+        </div>
+        <div class="w-full max-w-md mb-4">
+            <label class="block mb-1 font-semibold">Cell Size: <span id="cellSizeLabel">5</span></label>
+            <input type="range" id="cellSize" min="1" max="20" value="5" class="w-full">
+        </div>
+        <div class="w-full max-w-md mb-4">
+            <label class="block mb-1 font-semibold">Speed (ms): <span id="speedLabel">50</span></label>
+            <input type="range" id="speed" min="1" max="500" value="50" class="w-full">
+        </div>
+
+        <div class="flex mb-6">
+            <button id="start" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded m-2">Start</button>
+            <button id="pause" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded m-2">Pause</button>
+            <button id="reset" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded m-2">Reset</button>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500">
+            <a href="https://github.com/yourusername/your-repo" target="_blank" class="underline hover:text-gray-700">View on GitHub</a>
+        </footer>
     </div>
-    <canvas id="canvas"></canvas>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -39,30 +44,27 @@
         const gridSizeSlider = document.getElementById('gridSize');
         const cellSizeSlider = document.getElementById('cellSize');
         const speedSlider = document.getElementById('speed');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-
+        const gridSizeLabel = document.getElementById('gridSizeLabel');
+        const cellSizeLabel = document.getElementById('cellSizeLabel');
+        const speedLabel = document.getElementById('speedLabel');
         let gridSize = +gridSizeSlider.value;
         let cellSize = +cellSizeSlider.value;
         let speed = +speedSlider.value;
-        let grid, ant, interval;
 
-        function initGrid() {
+        let grid = [];
+        let ant = { x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2), dir: 0 };
+        let interval;
+
+        function init() {
             grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
-        }
-
-        function initAnt() {
-            ant = {
-                x: Math.floor(gridSize / 2),
-                y: Math.floor(gridSize / 2),
-                dir: 0 // 0: up, 1: right, 2: down, 3: left
-            };
-        }
-
-        function drawGrid() {
+            ant = { x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2), dir: 0 };
             canvas.width = gridSize * cellSize;
             canvas.height = gridSize * cellSize;
+            draw();
+            canvas.classList.add('opacity-100');
+        }
+
+        function draw() {
             for (let y = 0; y < gridSize; y++) {
                 for (let x = 0; x < gridSize; x++) {
                     ctx.fillStyle = grid[y][x] ? '#000' : '#fff';
@@ -74,21 +76,23 @@
         }
 
         function step() {
-            // Turn
             if (grid[ant.y][ant.x] === 0) {
-                ant.dir = (ant.dir + 1) % 4; // right
+                ant.dir = (ant.dir + 1) % 4;
+                grid[ant.y][ant.x] = 1;
             } else {
-                ant.dir = (ant.dir + 3) % 4; // left
+                ant.dir = (ant.dir + 3) % 4;
+                grid[ant.y][ant.x] = 0;
             }
-            // Flip
-            grid[ant.y][ant.x] ^= 1;
-            // Move forward
-            if (ant.dir === 0) ant.y = (ant.y - 1 + gridSize) % gridSize;
-            if (ant.dir === 1) ant.x = (ant.x + 1) % gridSize;
-            if (ant.dir === 2) ant.y = (ant.y + 1) % gridSize;
-            if (ant.dir === 3) ant.x = (ant.x - 1 + gridSize) % gridSize;
 
-            drawGrid();
+            if (ant.dir === 0) ant.y--;
+            if (ant.dir === 1) ant.x++;
+            if (ant.dir === 2) ant.y++;
+            if (ant.dir === 3) ant.x--;
+
+            ant.x = (ant.x + gridSize) % gridSize;
+            ant.y = (ant.y + gridSize) % gridSize;
+
+            draw();
         }
 
         function start() {
@@ -104,33 +108,35 @@
 
         function reset() {
             pause();
-            initGrid();
-            initAnt();
-            drawGrid();
+            init();
         }
 
-        // Event listeners
-        startBtn.addEventListener('click', start);
-        pauseBtn.addEventListener('click', pause);
-        resetBtn.addEventListener('click', reset);
         gridSizeSlider.addEventListener('input', () => {
             gridSize = +gridSizeSlider.value;
-            reset();
+            gridSizeLabel.textContent = gridSize;
+            init();
         });
+
         cellSizeSlider.addEventListener('input', () => {
             cellSize = +cellSizeSlider.value;
-            drawGrid();
+            cellSizeLabel.textContent = cellSize;
+            init();
         });
+
         speedSlider.addEventListener('input', () => {
             speed = +speedSlider.value;
+            speedLabel.textContent = speed;
             if (interval) {
                 pause();
                 start();
             }
         });
 
-        // Initialize
-        reset();
+        document.getElementById('start').addEventListener('click', start);
+        document.getElementById('pause').addEventListener('click', pause);
+        document.getElementById('reset').addEventListener('click', reset);
+
+        init();
     </script>
 </body>
 </html>
