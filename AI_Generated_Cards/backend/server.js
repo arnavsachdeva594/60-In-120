@@ -16,23 +16,26 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/stabilityai/sdxl-turbo';
+// Hugging Face API URL for Stable Diffusion model
+const HF_MODEL_URL = 'https://hf.space/embed/stabilityai/stable-diffusion/+/api/predict/';
 
 async function generateImage(prompt) {
   try {
     const response = await axios.post(
       HF_MODEL_URL,
-      { inputs: prompt },
+      {
+        data: [prompt]  // Adjust the structure to fit Hugging Face Spaces' API
+      },
       {
         headers: {
           Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
         },
-        responseType: 'arraybuffer',
       }
     );
 
-    const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
-    return `data:image/png;base64,${imageBase64}`;
+    // Assuming the response contains the image URL in 'data' key
+    const imageUrl = response.data.data[0];  // Adjust if the response structure is different
+    return imageUrl;
   } catch (error) {
     console.error('Hugging Face API error:', error.response?.data || error.message);
     throw new Error('Failed to generate image from Hugging Face');
