@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langton's Ant Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Langton's Ant Simulator</h1>
+        </header>
+        
+        <div class="controls">
+            <button id="startPauseBtn">Start</button>
+            <button id="resetBtn">Reset</button>
+            <label for="speed">Speed:</label>
+            <input type="range" id="speed" min="1" max="100" value="50">
+            <span id="speedLabel">50</span>
+            <label for="size">Grid Size:</label>
+            <input type="number" id="size" min="10" max="200" value="101">
+        </div>
+        
+        <canvas id="canvas"></canvas>
+        
+        <footer>
+            <button id="toggleDarkMode">🌙 Dark Mode</button>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

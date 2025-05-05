@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Langton's Ant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .content {
+            text-align: center;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 transition-colors duration-500">
+    <div class="flex flex-col items-center justify-center min-h-screen">
+        <!-- Navigation Menu -->
+        <nav class="w-full max-w-md text-center mb-8">
+            <a href="index.html" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">Simulator</a>
+            <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">GitHub</a>
+        </nav>
+
+        <h1 class="text-4xl font-bold mb-6 text-indigo-600">About Langton's Ant</h1>
+
+        <div class="content">
+            <p class="text-lg text-gray-700 mb-4">
+                Langton's Ant is a mathematical simulation created by Chris Langton in the 1980s.
+                It involves a simple agent ("ant") that moves around a grid based on a set of rules.
+                The ant flips the color of each square it visits, then turns either left or right depending on the color.
+                The simulation begins with a seemingly random pattern, but after some time, the ant eventually starts building a repeating "highway."
+            </p>
+            <p class="text-lg text-gray-700 mb-4">
+                The process demonstrates emergent behavior, where complex structures arise from very simple rules. The Langton’s Ant is often used to study computational systems, cellular automata, and the idea of emergence.
+            </p>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500">
+            <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank" class="underline hover:text-gray-700">View on GitHub</a>
+        </footer>
+
+        <button id="toggleDark" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded m-2 mt-4">Dark Mode</button>
+    </div>
+
+    <script>
+        const toggleDark = document.getElementById('toggleDark');
+        let isDarkMode = false;
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('bg-gray-900', isDarkMode);
+            document.body.classList.toggle('bg-gray-100', !isDarkMode);
+            document.body.classList.toggle('text-gray-100', isDarkMode);
+            document.body.classList.toggle('text-gray-900', !isDarkMode);
+            toggleDark.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+        }
+
+        toggleDark.addEventListener('click', toggleDarkMode);
+    </script>
+</body>
+</html>
