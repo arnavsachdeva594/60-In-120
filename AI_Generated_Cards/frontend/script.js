@@ -1,61 +1,35 @@
-const BACKEND_URL = 'https://six0-in-120.onrender.com'; // <-- Your Render URL
+const generateCardButton = document.getElementById('generateCard');
+const cardPrompt = document.getElementById('cardPrompt');
+const generatedCard = document.getElementById('generatedCard');
+const cardName = document.getElementById('cardName');
+const cardBackstory = document.getElementById('cardBackstory');
+const cardImage = document.getElementById('cardImage');
 
-const promptInput = document.getElementById('prompt-input');
-const generateBtn = document.getElementById('generate');
-const downloadBtn = document.getElementById('download');
-const cardName = document.getElementById('card-name');
-const cardDescription = document.getElementById('card-description');
-const cardImage = document.getElementById('card-image');
-const card = document.getElementById('card');
-const gallery = document.getElementById('gallery');
+// Generate Card Function
+generateCardButton.addEventListener('click', async () => {
+  const prompt = cardPrompt.value || 'Generate a unique fantasy creature name and short backstory.';
 
-async function generateAICard() {
   try {
-    const res = await fetch(`${BACKEND_URL}/generate-card`, {
+    const response = await fetch('/generate-card', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: promptInput.value })
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt }),
     });
 
-    const data = await res.json();
-    const [nameLine, ...descLines] = data.nameAndBackstory.split('.');
-    cardName.textContent = nameLine;
-    cardDescription.textContent = descLines.join('.').trim();
-    cardImage.src = data.imageUrl;
+    const data = await response.json();
 
-    saveToGallery({ name: nameLine, description: descLines.join('.').trim(), image: data.imageUrl });
-    loadGallery();
-  } catch (err) {
-    console.error(err);
-    alert('Failed to generate card. Please try again later.');
+    if (data.error) {
+      alert('Failed to generate card');
+    } else {
+      cardName.textContent = data.nameAndBackstory.split('.')[0];
+      cardBackstory.textContent = data.nameAndBackstory.split('.')[1] || 'No backstory provided.';
+      cardImage.src = data.imageUrl;
+      generatedCard.style.display = 'block';
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Failed to generate card');
   }
-}
-
-function saveToGallery(cardObj) {
-  const cards = JSON.parse(localStorage.getItem('gallery')) || [];
-  cards.push(cardObj);
-  localStorage.setItem('gallery', JSON.stringify(cards));
-}
-
-function loadGallery() {
-  const cards = JSON.parse(localStorage.getItem('gallery')) || [];
-  gallery.innerHTML = '';
-  cards.forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `<img src="${c.image}" alt=""><h3>${c.name}</h3><p>${c.description}</p>`;
-    gallery.appendChild(div);
-  });
-}
-
-async function downloadCard() {
-  const canvas = await html2canvas(card);
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/png');
-  link.download = 'ai_card.png';
-  link.click();
-}
-
-generateBtn.addEventListener('click', generateAICard);
-downloadBtn.addEventListener('click', downloadCard);
-window.addEventListener('load', loadGallery);
+});

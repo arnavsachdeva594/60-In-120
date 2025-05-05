@@ -3,39 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Card Generator</title>
-  <link rel="stylesheet" href="style.css">
+  <title>AI Generated Cards</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>AI Generated Fantasy Cards</h1>
-    <nav>
-      <a href="index.html">Home</a> | 
-      <a href="about.html">About Langton's Ant</a> | 
-      <a href="https://github.com/yourusername/ai-card-generator" target="_blank">GitHub</a>
-    </nav>
-  </header>
+  <div class="container">
+    <header>
+      <h1>AI Generated Cards</h1>
+      <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+    </header>
 
-  <main>
-    <div>
-      <label for="prompt-input">Enter prompt:</label>
-      <input type="text" id="prompt-input" placeholder="Enter prompt for AI card generation" />
-      <button id="generate">Generate Card</button>
-    </div>
+    <main>
+      <div class="card-container">
+        <h2>Generate Your Custom Card</h2>
+        <textarea id="cardPrompt" placeholder="Describe your card... (e.g., a mythical creature)"></textarea>
+        <button id="generateCard" class="generate-btn">Generate Card</button>
 
-    <div id="card">
-      <h2 id="card-name">Card Name</h2>
-      <p id="card-description">Card Description</p>
-      <img id="card-image" alt="Generated card image" />
-      <button id="download">Download Card</button>
-    </div>
+        <div id="generatedCard" class="generated-card" style="display: none;">
+          <h3 id="cardName"></h3>
+          <p id="cardBackstory"></p>
+          <img id="cardImage" alt="Generated Card Image">
+        </div>
+      </div>
+    </main>
 
-    <div id="gallery"></div>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 AI Card Generator | Created with OpenAI</p>
-  </footer>
+    <footer>
+      <p>Made with ❤️ by AI Generated Cards</p>
+    </footer>
+  </div>
 
   <script src="script.js"></script>
 </body>
