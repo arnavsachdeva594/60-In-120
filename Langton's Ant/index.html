@@ -33,4 +33,137 @@
             <button id="start" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded m-2">Start</button>
             <button id="pause" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded m-2">Pause</button>
             <button id="reset" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded m-2">Reset</button>
-            <button id
+            <button id="toggleDark" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded m-2">Dark Mode</button>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500">
+            <a href="https://github.com/yourusername/your-repo" target="_blank" class="underline hover:text-gray-700">View on GitHub</a>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const gridSizeSlider = document.getElementById('gridSize');
+        const turnRuleSlider = document.getElementById('turnRule');
+        const speedSlider = document.getElementById('speed');
+        const gridSizeLabel = document.getElementById('gridSizeLabel');
+        const ruleLabel = document.getElementById('ruleLabel');
+        const speedLabel = document.getElementById('speedLabel');
+        const toggleDark = document.getElementById('toggleDark');
+
+        let gridSize = +gridSizeSlider.value;
+        let speed = +speedSlider.value;
+        let isDarkMode = false;
+        let turnRule = +turnRuleSlider.value;
+
+        let grid = [];
+        let ant = { x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2), dir: 0 };
+        let interval;
+
+        function init() {
+            grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+            ant = { x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2), dir: 0 };
+            canvas.width = gridSize * 5;  // Fixed cell size of 5px
+            canvas.height = gridSize * 5;
+            draw();
+            canvas.classList.add('opacity-100');
+        }
+
+        function draw() {
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    ctx.fillStyle = grid[y][x] ? (isDarkMode ? '#eee' : '#333') : (isDarkMode ? '#111' : '#f9f9f9');
+                    ctx.fillRect(x * 5, y * 5, 5, 5);  // Fixed cell size of 5px
+                }
+            }
+            ctx.fillStyle = 'red';
+            ctx.fillRect(ant.x * 5, ant.y * 5, 5, 5);  // Fixed cell size of 5px
+        }
+
+        function step() {
+            if (turnRule === 0) {  // Basic Langton's Ant (Left Turn)
+                if (grid[ant.y][ant.x] === 0) {
+                    ant.dir = (ant.dir + 1) % 4;
+                    grid[ant.y][ant.x] = 1;
+                } else {
+                    ant.dir = (ant.dir + 3) % 4;
+                    grid[ant.y][ant.x] = 0;
+                }
+            } else {  // Alternate rule (Right Turn or other behavior)
+                if (grid[ant.y][ant.x] === 0) {
+                    ant.dir = (ant.dir + 3) % 4;
+                    grid[ant.y][ant.x] = 1;
+                } else {
+                    ant.dir = (ant.dir + 1) % 4;
+                    grid[ant.y][ant.x] = 0;
+                }
+            }
+
+            if (ant.dir === 0) ant.y--;
+            if (ant.dir === 1) ant.x++;
+            if (ant.dir === 2) ant.y++;
+            if (ant.dir === 3) ant.x--;
+
+            ant.x = (ant.x + gridSize) % gridSize;
+            ant.y = (ant.y + gridSize) % gridSize;
+
+            draw();
+        }
+
+        function start() {
+            if (!interval) {
+                interval = setInterval(step, speed);
+            }
+        }
+
+        function pause() {
+            clearInterval(interval);
+            interval = null;
+        }
+
+        function reset() {
+            pause();
+            init();
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('bg-gray-900', isDarkMode);
+            document.body.classList.toggle('bg-gray-100', !isDarkMode);
+            document.body.classList.toggle('text-gray-100', isDarkMode);
+            document.body.classList.toggle('text-gray-900', !isDarkMode);
+            toggleDark.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+            draw();
+        }
+
+        gridSizeSlider.addEventListener('input', () => {
+            gridSize = +gridSizeSlider.value;
+            gridSizeLabel.textContent = gridSize;
+            init();
+        });
+
+        turnRuleSlider.addEventListener('input', () => {
+            turnRule = +turnRuleSlider.value;
+            ruleLabel.textContent = turnRule === 0 ? 'Basic (Left Turn)' : 'Alternate (Right Turn)';
+            reset();
+        });
+
+        speedSlider.addEventListener('input', () => {
+            speed = +speedSlider.value;
+            speedLabel.textContent = speed;
+            if (interval) {
+                pause();
+                start();
+            }
+        });
+
+        document.getElementById('start').addEventListener('click', start);
+        document.getElementById('pause').addEventListener('click', pause);
+        document.getElementById('reset').addEventListener('click', reset);
+        toggleDark.addEventListener('click', toggleDarkMode);
+
+        init();
+    </script>
+</body>
+</html>
