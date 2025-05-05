@@ -16,33 +16,45 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2';
-const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+const HF_MODEL_URL = 'https://api-inference.huggingface.co/models/prompthero/openjourney';
+
+async function generateImage(prompt) {
+  try {
+    const response = await axios.post(
+      HF_MODEL_URL,
+      { inputs: prompt },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+        },
+        responseType: 'arraybuffer',
+      }
+    );
+
+    const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+    return `data:image/png;base64,${imageBase64}`;
+  } catch (error) {
+    console.error('Hugging Face API error:', error.response?.data || error.message);
+    throw new Error('Failed to generate image from Hugging Face');
+  }
+}
 
 app.post('/generate-card', async (req, res) => {
   try {
     const userPrompt = req.body.prompt || 'Generate a unique fantasy creature name and short backstory.';
+    
+    // Use GPT fallback text (or mock for now)
+    const nameAndBackstory = `Mystic Drake. A legendary dragon that guards the ancient forests.`;
 
-    // Here you can skip GPT generation or replace it with a static name
-    const nameAndBackstory = userPrompt;
-
-    // Call Hugging Face image API
-    const response = await axios.post(
-      HUGGINGFACE_API_URL,
-      { inputs: nameAndBackstory },
-      { headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}` }, responseType: 'arraybuffer' }
-    );
-
-    // Convert binary image to base64
-    const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
-    const imageUrl = `data:image/png;base64,${imageBase64}`;
+    const dallePrompt = `fantasy creature, ${nameAndBackstory.split('.')[0]}`;
+    const imageUrl = await generateImage(dallePrompt);
 
     res.json({
       nameAndBackstory,
       imageUrl,
     });
   } catch (error) {
-    console.error(error.response?.data || error.message);
+    console.error(error);
     res.status(500).json({ error: 'Failed to generate card' });
   }
 });
