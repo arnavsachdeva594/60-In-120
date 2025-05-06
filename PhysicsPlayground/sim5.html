@@ -4,29 +4,54 @@
   <meta charset="UTF-8">
   <title>Electric Circuits | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .sim-container { text-align: center; margin: 2rem auto; }
-    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
-    .controls { margin: 1.5rem 0; }
-    .controls label { margin: 0 0.5rem; }
-  </style>
 </head>
 <body>
+  <div class="loader">
+    <div class="atom">
+      <div class="electron"></div>
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+  </button>
   <header>
     <h1>Electric Circuits</h1>
     <p>Build and test a simple circuit!</p>
   </header>
   <main>
-    <div class="sim-container">
+    <div class="canvas-container">
       <canvas id="circuitCanvas" width="400" height="220"></canvas>
-      <div class="controls">
-        <label>Voltage: <input type="range" id="voltage" min="1" max="10" value="5"> <span id="voltVal">5</span>V</label>
-        <label>Resistance: <input type="range" id="resistance" min="1" max="20" value="5"> <span id="resVal">5</span>Ω</label>
-      </div>
-      <a href="index.html">← Back to Home</a>
     </div>
+    <div class="controls">
+      <label>Voltage: <input type="range" id="voltage" min="1" max="10" value="5"> <span id="voltVal">5</span>V</label>
+      <label>Resistance: <input type="range" id="resistance" min="1" max="20" value="5"> <span id="resVal">5</span>Ω</label>
+    </div>
+    <a href="index.html">← Back to Home</a>
   </main>
   <script>
+    // Loader
+    window.addEventListener('load', () => {
+      document.querySelector('.loader').classList.add('hidden');
+    });
+
+    // Theme management
+    function toggleTheme() {
+      document.body.setAttribute('data-theme',
+        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      );
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+      document.getElementById('themeIcon').textContent =
+        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent =
+      savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // Circuit simulation
     const canvas = document.getElementById('circuitCanvas');
     const ctx = canvas.getContext('2d');
     let voltage = 5;

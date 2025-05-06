@@ -4,29 +4,54 @@
   <meta charset="UTF-8">
   <title>Wave Interference | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .sim-container { text-align: center; margin: 2rem auto; }
-    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
-    .controls { margin: 1.5rem 0; }
-    .controls label { margin: 0 0.5rem; }
-  </style>
 </head>
 <body>
+  <div class="loader">
+    <div class="atom">
+      <div class="electron"></div>
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+  </button>
   <header>
     <h1>Wave Interference</h1>
     <p>See how waves combine and interact!</p>
   </header>
   <main>
-    <div class="sim-container">
+    <div class="canvas-container">
       <canvas id="waveCanvas" width="420" height="320"></canvas>
-      <div class="controls">
-        <label>Wavelength: <input type="range" id="wavelength" min="20" max="80" value="40"> <span id="wlVal">40</span> px</label>
-        <label>Source Distance: <input type="range" id="srcDist" min="40" max="160" value="80"> <span id="sdVal">80</span> px</label>
-      </div>
-      <a href="index.html">← Back to Home</a>
     </div>
+    <div class="controls">
+      <label>Wavelength: <input type="range" id="wavelength" min="20" max="80" value="40"> <span id="wlVal">40</span> px</label>
+      <label>Source Distance: <input type="range" id="srcDist" min="40" max="160" value="80"> <span id="sdVal">80</span> px</label>
+    </div>
+    <a href="index.html">← Back to Home</a>
   </main>
   <script>
+    // Loader
+    window.addEventListener('load', () => {
+      document.querySelector('.loader').classList.add('hidden');
+    });
+
+    // Theme management
+    function toggleTheme() {
+      document.body.setAttribute('data-theme',
+        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      );
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+      document.getElementById('themeIcon').textContent =
+        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent =
+      savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // Wave interference
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
     let wavelength = 40;

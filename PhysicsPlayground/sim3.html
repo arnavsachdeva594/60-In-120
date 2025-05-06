@@ -4,30 +4,55 @@
   <meta charset="UTF-8">
   <title>Spring Oscillator | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .sim-container { text-align: center; margin: 2rem auto; }
-    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
-    .controls { margin: 1.5rem 0; }
-    .controls label { margin: 0 0.5rem; }
-  </style>
 </head>
 <body>
+  <div class="loader">
+    <div class="atom">
+      <div class="electron"></div>
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+  </button>
   <header>
     <h1>Spring Oscillator</h1>
     <p>Simulate Hooke's Law in action!</p>
   </header>
   <main>
-    <div class="sim-container">
+    <div class="canvas-container">
       <canvas id="springCanvas" width="400" height="350"></canvas>
-      <div class="controls">
-        <label>Mass: <input type="range" id="mass" min="1" max="10" value="3"> <span id="massVal">3</span>kg</label>
-        <label>k: <input type="range" id="k" min="10" max="50" value="20"> <span id="kVal">20</span>N/m</label>
-        <button onclick="resetSpring()">Reset</button>
-      </div>
-      <a href="index.html">← Back to Home</a>
     </div>
+    <div class="controls">
+      <label>Mass: <input type="range" id="mass" min="1" max="10" value="3"> <span id="massVal">3</span>kg</label>
+      <label>k: <input type="range" id="k" min="10" max="50" value="20"> <span id="kVal">20</span>N/m</label>
+      <button onclick="resetSpring()">Reset</button>
+    </div>
+    <a href="index.html">← Back to Home</a>
   </main>
   <script>
+    // Loader
+    window.addEventListener('load', () => {
+      document.querySelector('.loader').classList.add('hidden');
+    });
+
+    // Theme management
+    function toggleTheme() {
+      document.body.setAttribute('data-theme',
+        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      );
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+      document.getElementById('themeIcon').textContent =
+        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent =
+      savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // Spring simulation
     const canvas = document.getElementById('springCanvas');
     const ctx = canvas.getContext('2d');
     let mass = 3;

@@ -4,30 +4,56 @@
   <meta charset="UTF-8">
   <title>Pendulum Simulator | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .sim-container { text-align: center; margin: 2rem auto; }
-    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
-    .controls { margin: 1.5rem 0; }
-    .controls label { margin: 0 0.5rem; }
-  </style>
 </head>
 <body>
+  <div class="loader">
+    <div class="atom">
+      <div class="electron"></div>
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+  </button>
   <header>
     <h1>Pendulum Simulator</h1>
-    <p>Explore simple harmonic motion!</p>
+    <p>Explore simple harmonic motion! Drag the bob to set starting angle.</p>
   </header>
   <main>
-    <div class="sim-container">
+    <div class="canvas-container">
+      <div class="energy-display" id="energyDisplay"></div>
       <canvas id="pendulumCanvas" width="400" height="350"></canvas>
-      <div class="controls">
-        <label>Length: <input type="range" id="length" min="100" max="250" value="200"></label>
-        <label>Gravity: <input type="range" id="gravity" min="5" max="20" value="10"></label>
-        <button onclick="resetPendulum()">Reset</button>
-      </div>
-      <a href="index.html">← Back to Home</a>
     </div>
+    <div class="controls">
+      <label>Length: <input type="range" id="length" min="100" max="250" value="200"></label>
+      <label>Gravity: <input type="range" id="gravity" min="5" max="20" value="10"></label>
+      <button onclick="resetPendulum()">Reset</button>
+    </div>
+    <a href="index.html">← Back to Home</a>
   </main>
   <script>
+    // Loader
+    window.addEventListener('load', () => {
+      document.querySelector('.loader').classList.add('hidden');
+    });
+
+    // Theme management
+    function toggleTheme() {
+      document.body.setAttribute('data-theme',
+        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      );
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+      document.getElementById('themeIcon').textContent =
+        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent =
+      savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // Pendulum simulation
     const canvas = document.getElementById('pendulumCanvas');
     const ctx = canvas.getContext('2d');
     let length = 200;
@@ -37,11 +63,23 @@
     let angleAcc = 0;
     let origin = { x: 200, y: 60 };
     let bobRadius = 25;
+    let mass = 1;
+    let isDragging = false;
+    let trail = [];
 
     function drawPendulum() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let bobX = origin.x + length * Math.sin(angle);
       let bobY = origin.y + length * Math.cos(angle);
+
+      // Draw trail
+      trail.forEach((pos, index) => {
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, bobRadius * (index/trail.length), 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(126,87,194,${0.2 + (index/trail.length)*0.5})`;
+        ctx.fill();
+      });
+
       // Draw rod
       ctx.beginPath();
       ctx.moveTo(origin.x, origin.y);
@@ -49,6 +87,7 @@
       ctx.lineWidth = 4;
       ctx.strokeStyle = "#3949ab";
       ctx.stroke();
+
       // Draw bob
       ctx.beginPath();
       ctx.arc(bobX, bobY, bobRadius, 0, 2 * Math.PI);
@@ -56,13 +95,28 @@
       ctx.fill();
       ctx.strokeStyle = "#5e35b1";
       ctx.stroke();
+
+      // Update trail
+      trail.push({x: bobX, y: bobY});
+      if (trail.length > 30) trail.shift();
+
+      // Energy display
+      const potential = mass * gravity * (length - length * Math.cos(angle));
+      const kinetic = 0.5 * mass * (length * angleVel) ** 2;
+      document.getElementById('energyDisplay').innerHTML = `
+        PE: ${potential.toFixed(1)} J<br>
+        KE: ${kinetic.toFixed(1)} J<br>
+        Total: ${(potential + kinetic).toFixed(1)} J
+      `;
     }
 
     function updatePendulum() {
-      angleAcc = (-gravity / length) * Math.sin(angle);
-      angleVel += angleAcc;
-      angleVel *= 0.995; // damping
-      angle += angleVel;
+      if (!isDragging) {
+        angleAcc = (-gravity / length) * Math.sin(angle);
+        angleVel += angleAcc;
+        angleVel *= 0.995; // damping
+        angle += angleVel;
+      }
     }
 
     function animate() {
@@ -81,6 +135,42 @@
     function resetPendulum() {
       angle = Math.PI / 4;
       angleVel = 0;
+      trail = [];
+    }
+
+    // Drag to set angle
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('mousemove', drag);
+    canvas.addEventListener('mouseup', endDrag);
+    canvas.addEventListener('mouseleave', endDrag);
+
+    function startDrag(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const bobX = origin.x + length * Math.sin(angle);
+      const bobY = origin.y + length * Math.cos(angle);
+      const dx = mouseX - bobX;
+      const dy = mouseY - bobY;
+      if (Math.sqrt(dx*dx + dy*dy) < bobRadius + 10) {
+        isDragging = true;
+        angleVel = 0;
+      }
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const dx = mouseX - origin.x;
+      const dy = mouseY - origin.y;
+      angle = Math.atan2(dx, dy);
+      trail = [];
+    }
+
+    function endDrag() {
+      isDragging = false;
     }
 
     animate();

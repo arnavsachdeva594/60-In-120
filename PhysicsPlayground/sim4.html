@@ -4,29 +4,54 @@
   <meta charset="UTF-8">
   <title>Optics Lab | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .sim-container { text-align: center; margin: 2rem auto; }
-    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
-    .controls { margin: 1.5rem 0; }
-    .controls label { margin: 0 0.5rem; }
-  </style>
 </head>
 <body>
+  <div class="loader">
+    <div class="atom">
+      <div class="electron"></div>
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+  </button>
   <header>
     <h1>Optics Lab</h1>
     <p>Experiment with a convex lens!</p>
   </header>
   <main>
-    <div class="sim-container">
+    <div class="canvas-container">
       <canvas id="opticsCanvas" width="500" height="320"></canvas>
-      <div class="controls">
-        <label>Object Distance: <input type="range" id="objDist" min="60" max="220" value="120"> <span id="objDistVal">120</span> px</label>
-        <label>Focal Length: <input type="range" id="focalLen" min="40" max="100" value="70"> <span id="focalLenVal">70</span> px</label>
-      </div>
-      <a href="index.html">← Back to Home</a>
     </div>
+    <div class="controls">
+      <label>Object Distance: <input type="range" id="objDist" min="60" max="220" value="120"> <span id="objDistVal">120</span> px</label>
+      <label>Focal Length: <input type="range" id="focalLen" min="40" max="100" value="70"> <span id="focalLenVal">70</span> px</label>
+    </div>
+    <a href="index.html">← Back to Home</a>
   </main>
   <script>
+    // Loader
+    window.addEventListener('load', () => {
+      document.querySelector('.loader').classList.add('hidden');
+    });
+
+    // Theme management
+    function toggleTheme() {
+      document.body.setAttribute('data-theme',
+        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      );
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+      document.getElementById('themeIcon').textContent =
+        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent =
+      savedTheme === 'dark' ? '☀️' : '🌙';
+
+    // Optics simulation
     const canvas = document.getElementById('opticsCanvas');
     const ctx = canvas.getContext('2d');
     let objDist = 120;

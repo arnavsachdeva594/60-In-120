@@ -4,24 +4,56 @@
   <meta charset="UTF-8">
   <title>Physics Playground</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
+  <div class="loader">
+    <div class="atom">
+      <div class="electron"></div>
+      <div class="electron"></div>
+      <div class="electron"></div>
+    </div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">🌙</span>
+  </button>
   <header>
     <h1>Physics Playground</h1>
     <p>Explore interactive physics experiments!</p>
   </header>
   <main>
     <div class="sim-grid">
-      <a href="sim1.html" class="sim-card">Pendulum Simulator</a>
-      <a href="sim2.html" class="sim-card">Projectile Motion</a>
-      <a href="sim3.html" class="sim-card">Spring Oscillator</a>
-      <a href="sim4.html" class="sim-card">Optics Lab</a>
-      <a href="sim5.html" class="sim-card">Electric Circuits</a>
-      <a href="sim6.html" class="sim-card">Wave Interference</a>
+      <a href="sim1.html" class="sim-card"><i class="fas fa-clock"></i>Pendulum Simulator</a>
+      <a href="sim2.html" class="sim-card"><i class="fas fa-rocket"></i>Projectile Motion</a>
+      <a href="sim3.html" class="sim-card"><i class="fas fa-wave-square"></i>Spring Oscillator</a>
+      <a href="sim4.html" class="sim-card"><i class="fas fa-glasses"></i>Optics Lab</a>
+      <a href="sim5.html" class="sim-card"><i class="fas fa-bolt"></i>Electric Circuits</a>
+      <a href="sim6.html" class="sim-card"><i class="fas fa-water"></i>Wave Interference</a>
     </div>
   </main>
   <footer>
     <p>Made with ❤️ for science. Powered by GitHub Pages.</p>
   </footer>
+  <script>
+    // Loader
+    window.addEventListener('load', () => {
+      document.querySelector('.loader').classList.add('hidden');
+    });
+
+    // Theme management
+    function toggleTheme() {
+      document.body.setAttribute('data-theme',
+        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      );
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+      document.getElementById('themeIcon').textContent =
+        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeIcon').textContent =
+      savedTheme === 'dark' ? '☀️' : '🌙';
+  </script>
 </body>
 </html>
