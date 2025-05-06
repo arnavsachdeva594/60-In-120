@@ -4,45 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Conway’s Game of Life</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/e/e5/Game_of_life_glider.png">
 </head>
 <body>
   <header>
     <nav>
-      <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Game_of_life_glider.png" alt="Glider" />
-        <span>Game of Life</span>
-      </div>
-      <div class="nav-links">
-        <a href="index.html" class="active">Game</a>
-        <a href="about.html">About</a>
-        <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank">GitHub</a>
-      </div>
+      <a href="index.html" class="active">Game</a>
+      <a href="about.html">About</a>
+      <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank" rel="noopener noreferrer">GitHub</a>
     </nav>
+    <h1>Conway’s Game of Life</h1>
+    <p>Elegant Cellular Automaton Simulator</p>
   </header>
   <main>
-    <h1>Conway’s Game of Life</h1>
-    <p class="subtitle">Elegant Cellular Automaton Simulator</p>
     <div class="controls">
-      <button id="start" title="Start"><span>▶</span> Start</button>
-      <button id="pause" title="Pause"><span>⏸</span> Pause</button>
-      <button id="step" title="Step"><span>⏭</span> Step</button>
-      <button id="reset" title="Reset"><span>⟲</span> Reset</button>
-      <button id="random" title="Randomize"><span>✱</span> Randomize</button>
+      <button id="start">Start</button>
+      <button id="pause">Pause</button>
+      <button id="step">Step</button>
+      <button id="reset">Reset</button>
+      <button id="random">Randomize</button>
       <label>
-        <span>Speed:</span>
+        Speed:
         <input type="range" id="speed" min="1" max="20" step="1" value="5">
         <span id="speedValue">5</span>
       </label>
     </div>
-    <div class="canvas-container">
-      <canvas id="gameCanvas"></canvas>
-    </div>
+    <canvas id="gameCanvas"></canvas>
   </main>
   <footer>
-    <span>Inspired by John Conway’s classic. Crafted with <span style="color:#e25555;">♥</span></span>
+    <span>Inspired by John Conway’s classic. Crafted with ❤️</span>
   </footer>
   <script src="script.js"></script>
 </body>
