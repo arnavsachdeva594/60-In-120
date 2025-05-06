@@ -10,6 +10,7 @@ Dark mode toggle.
 Dynamic visualization with HTML5 Canvas.
 
 Try It Now
+
 You can try the Langton's Ant Simulator online at:
 https://arnavsachdeva594.github.io/60-In-120/Langtons_Ant
 
