@@ -1,5 +1,3 @@
-// script.js
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const CELL_SIZE = 18;
@@ -29,8 +27,8 @@ function drawGrid() {
       ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     }
   }
-  // Draw grid lines
   ctx.strokeStyle = GRID_COLOR;
+  ctx.lineWidth = 1;
   for (let x = 0; x <= cols; x++) {
     ctx.beginPath();
     ctx.moveTo(x * CELL_SIZE, 0);
@@ -99,21 +97,25 @@ function randomize() {
   drawGrid();
 }
 
-// Controls
 document.getElementById('start').onclick = start;
 document.getElementById('pause').onclick = pause;
 document.getElementById('step').onclick = step;
 document.getElementById('reset').onclick = reset;
 document.getElementById('random').onclick = randomize;
-document.getElementById('speed').oninput = (e) => {
+
+const speedSlider = document.getElementById('speed');
+const speedValue = document.getElementById('speedValue');
+
+speedSlider.oninput = (e) => {
   speed = +e.target.value;
+  speedValue.textContent = speed;
   if (running) {
     pause();
     start();
   }
 };
+speedValue.textContent = speed;
 
-// Toggle cells on click
 canvas.addEventListener('mousedown', function(e) {
   const rect = canvas.getBoundingClientRect();
   const x = Math.floor((e.clientX - rect.left) / CELL_SIZE);

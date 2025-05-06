@@ -1,19 +1,69 @@
 body {
-    background: #181818;
+    background: radial-gradient(ellipse at 50% 0%, #24243e 0%, #181818 100%);
     color: #f0f0f0;
     font-family: 'Inter', Arial, sans-serif;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
   }
   
-  header, footer {
-    text-align: center;
-    padding: 1.5rem 0;
-    background: #222;
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(20, 22, 32, 0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.12);
+  }
+  
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 0.5rem 1.5rem;
+  }
+  
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  
+  .logo {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 8px #00e67688);
+  }
+  
+  .site-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #00e676;
     letter-spacing: 0.05em;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 1.3rem;
+  }
+  
+  nav a {
+    color: #00e676;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.08rem;
+    letter-spacing: 0.03em;
+    padding: 0.25rem 0.7rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+  }
+  
+  nav a.active, nav a:hover {
+    background: #00e67622;
+    color: #fff;
   }
   
   main {
@@ -21,37 +71,216 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-bottom: 2rem;
+  }
+  
+  .centered-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2.5rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    background: linear-gradient(90deg, #00e676 30%, #00bfae 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .subtitle {
+    color: #b0b0b0;
+    font-size: 1.1rem;
+    margin-bottom: 2.2rem;
+    text-align: center;
   }
   
   .controls {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     display: flex;
-    gap: 1rem;
+    gap: 1.1rem;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
+    background: rgba(26, 26, 34, 0.94);
+    padding: 1.2rem 2rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.13);
   }
   
-  button, input[type="range"] {
-    background: #333;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1.25rem;
+  .controls label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #e0e0e0;
     font-size: 1rem;
-    transition: background 0.2s;
-    cursor: pointer;
   }
   
-  button:hover, input[type="range"]:hover {
-    background: #555;
+  button {
+    background: linear-gradient(90deg, #00e676 0%, #00bfae 100%);
+    color: #181818;
+    border: none;
+    border-radius: 7px;
+    padding: 0.55rem 1.3rem;
+    font-size: 1.08rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,230,118,0.08);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    outline: none;
+  }
+  
+  button span {
+    font-size: 1.1em;
+  }
+  
+  button:hover, button:focus {
+    background: linear-gradient(90deg, #00bfae 0%, #00e676 100%);
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(0,230,118,0.18);
+    transform: translateY(-2px) scale(1.03);
+  }
+  
+  input[type="range"] {
+    width: 100px;
+    accent-color: #00e676;
+    margin: 0 0.5rem;
+    background: transparent;
+    cursor: pointer;
+    transition: accent-color 0.2s;
+  }
+  
+  input[type="range"]:hover {
+    accent-color: #00bfae;
+  }
+  
+  #speedValue {
+    min-width: 1.5em;
+    display: inline-block;
+    text-align: right;
+    font-weight: 600;
+    color: #00e676;
+  }
+  
+  .canvas-card {
+    background: rgba(30, 30, 45, 0.98);
+    padding: 1.5rem;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   canvas {
     background: #222;
     border-radius: 12px;
     box-shadow: 0 4px 32px rgba(0,0,0,0.4);
-    margin-bottom: 2rem;
     touch-action: none;
+    transition: box-shadow 0.2s;
+    max-width: 95vw;
+    height: auto;
+  }
+  
+  footer {
+    text-align: center;
+    padding: 1.3rem 0 0.5rem 0;
+    background: #222;
+    letter-spacing: 0.05em;
+    font-size: 1rem;
+    color: #b0b0b0;
+    margin-top: auto;
+  }
+  
+  /* About Page Styles */
+  .about-card {
+    max-width: 700px;
+    margin: 3rem auto 0 auto;
+    background: rgba(30, 30, 45, 0.98);
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.22);
+    font-size: 1.15rem;
+    line-height: 1.7;
+  }
+  
+  .about-card h1 {
+    margin-top: 0;
+    font-size: 2.1rem;
+    background: linear-gradient(90deg, #00e676 30%, #00bfae 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .about-card h2 {
+    color: #00e676;
+    margin-top: 2rem;
+    font-size: 1.25rem;
+  }
+  
+  .about-card ul {
+    margin-left: 1.5em;
+    margin-bottom: 1.2em;
+  }
+  
+  .about-card .alive {
+    color: #00e676;
+    font-weight: bold;
+  }
+  
+  .about-card .dead {
+    color: #e25555;
+    font-weight: bold;
+  }
+  
+  .about-card .rule {
+    color: #00bfae;
+    font-weight: bold;
+  }
+  
+  .about-card a {
+    color: #00e676;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  
+  .about-card a:hover {
+    color: #fff;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 900px) {
+    nav {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 1rem 1rem 0.5rem 1rem;
+    }
+    .canvas-card {
+      padding: 0.5rem;
+    }
+    .about-card {
+      padding: 1.2rem 0.7rem;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 1.5rem;
+    }
+    .controls {
+      gap: 0.5rem;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.98rem;
+    }
+    .canvas-card {
+      padding: 0.2rem;
+    }
   }
   

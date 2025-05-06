@@ -4,26 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Conway’s Game of Life</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
-    <h1>Conway’s Game of Life</h1>
-    <p>Elegant Cellular Automaton Simulator</p>
+    <nav>
+      <div class="nav-left">
+        <span class="logo">🧬</span>
+        <span class="site-title">Game of Life</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="active">Game</a>
+        <a href="about.html">About</a>
+        <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </nav>
   </header>
   <main>
-    <div class="controls">
-      <button id="start">Start</button>
-      <button id="pause">Pause</button>
-      <button id="step">Step</button>
-      <button id="reset">Reset</button>
-      <button id="random">Randomize</button>
-      <label>Speed: <input type="range" id="speed" min="1" max="20" value="5"></label>
-    </div>
-    <canvas id="gameCanvas"></canvas>
+    <section class="centered-content">
+      <h1>Conway’s Game of Life</h1>
+      <p class="subtitle">A mesmerizing cellular automaton simulator</p>
+      <div class="controls">
+        <button id="start" title="Start"><span>▶</span> Start</button>
+        <button id="pause" title="Pause"><span>⏸</span> Pause</button>
+        <button id="step" title="Step"><span>⏭</span> Step</button>
+        <button id="reset" title="Reset"><span>⟲</span> Reset</button>
+        <button id="random" title="Randomize"><span>✱</span> Randomize</button>
+        <label>
+          <span>Speed:</span>
+          <input type="range" id="speed" min="1" max="20" step="1" value="5">
+          <span id="speedValue">5</span>
+        </label>
+      </div>
+      <div class="canvas-card">
+        <canvas id="gameCanvas"></canvas>
+      </div>
+    </section>
   </main>
   <footer>
-    <span>Inspired by John Conway’s classic. Crafted with ❤️</span>
+    <span>Inspired by John Conway’s classic. Crafted with <span style="color:#e25555;">♥</span></span>
   </footer>
   <script src="script.js"></script>
 </body>
