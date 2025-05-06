@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Projectile Simulator</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Simulator</title>
+    <style>
+        canvas {
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+            display: block;
+            margin: 0 auto;
+        }
+        #controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
-<body data-page="projectile">
-  <h1>Projectile Simulator</h1>
-  <nav><a href="index.html">← Home</a></nav>
-  <div class="sim-container">
-    <div class="controls" id="projectileControls"></div>
+<body>
+    <h1 style="text-align:center;">Projectile Simulator</h1>
     <canvas id="projectileCanvas" width="600" height="400"></canvas>
-  </div>
-  <script src="projectile.js"></script>
+    <div id="projectileControls"></div>
+    <script src="projectile.js"></script>
 </body>
 </html>
