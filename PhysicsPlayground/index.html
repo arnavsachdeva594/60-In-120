@@ -14,7 +14,7 @@
       <div class="electron"></div>
     </div>
   </div>
-  <button class="theme-toggle" onclick="toggleTheme()">
+  <button class="theme-toggle" id="themeToggleBtn">
     <span id="themeIcon">🌙</span>
   </button>
   <header>
@@ -35,25 +35,23 @@
     <p>Made with ❤️ for science. Powered by GitHub Pages.</p>
   </footer>
   <script>
-    // Loader
-    window.addEventListener('load', () => {
-      document.querySelector('.loader').classList.add('hidden');
-    });
-
-    // Theme management
-    function toggleTheme() {
-      document.body.setAttribute('data-theme',
-        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-      );
-      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+    document.addEventListener('DOMContentLoaded', function() {
+      // Loader
+      window.addEventListener('load', () => {
+        document.querySelector('.loader').classList.add('hidden');
+      });
+      // Theme toggle
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
       document.getElementById('themeIcon').textContent =
-        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-    }
-    // Initialize theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeIcon').textContent =
-      savedTheme === 'dark' ? '☀️' : '🌙';
+        savedTheme === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeToggleBtn').onclick = function() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+      };
+    });
   </script>
 </body>
 </html>

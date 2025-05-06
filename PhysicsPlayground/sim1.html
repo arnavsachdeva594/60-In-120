@@ -13,7 +13,7 @@
       <div class="electron"></div>
     </div>
   </div>
-  <button class="theme-toggle" onclick="toggleTheme()">
+  <button class="theme-toggle" id="themeToggleBtn">
     <span id="themeIcon">🌙</span>
   </button>
   <header>
@@ -28,152 +28,186 @@
     <div class="controls">
       <label>Length: <input type="range" id="length" min="100" max="250" value="200"></label>
       <label>Gravity: <input type="range" id="gravity" min="5" max="20" value="10"></label>
+      <label>Mass: <input type="range" id="mass" min="0.5" max="5" value="1" step="0.1"></label>
+      <label>Damping: <input type="range" id="damping" min="0.98" max="1" value="0.995" step="0.001"></label>
+      <span id="periodDisplay" style="margin-left:1.5rem;"></span>
       <button onclick="resetPendulum()">Reset</button>
     </div>
     <a href="index.html">← Back to Home</a>
   </main>
   <script>
-    // Loader
-    window.addEventListener('load', () => {
-      document.querySelector('.loader').classList.add('hidden');
-    });
-
-    // Theme management
-    function toggleTheme() {
-      document.body.setAttribute('data-theme',
-        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-      );
-      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+    document.addEventListener('DOMContentLoaded', function() {
+      // Loader
+      window.addEventListener('load', () => {
+        document.querySelector('.loader').classList.add('hidden');
+      });
+      // Theme toggle
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
       document.getElementById('themeIcon').textContent =
-        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-    }
-    // Initialize theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeIcon').textContent =
-      savedTheme === 'dark' ? '☀️' : '🌙';
+        savedTheme === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeToggleBtn').onclick = function() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+      };
 
-    // Pendulum simulation
-    const canvas = document.getElementById('pendulumCanvas');
-    const ctx = canvas.getContext('2d');
-    let length = 200;
-    let gravity = 10;
-    let angle = Math.PI / 4;
-    let angleVel = 0;
-    let angleAcc = 0;
-    let origin = { x: 200, y: 60 };
-    let bobRadius = 25;
-    let mass = 1;
-    let isDragging = false;
-    let trail = [];
+      // Pendulum simulation
+      const canvas = document.getElementById('pendulumCanvas');
+      const ctx = canvas.getContext('2d');
+      let length = 200;
+      let gravity = 10;
+      let angle = Math.PI / 4;
+      let angleVel = 0;
+      let angleAcc = 0;
+      let origin = { x: 200, y: 60 };
+      let bobRadius = 25;
+      let mass = 1;
+      let damping = 0.995;
+      let isDragging = false;
+      let trail = [];
 
-    function drawPendulum() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let bobX = origin.x + length * Math.sin(angle);
-      let bobY = origin.y + length * Math.cos(angle);
-
-      // Draw trail
-      trail.forEach((pos, index) => {
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, bobRadius * (index/trail.length), 0, 2 * Math.PI);
-        ctx.fillStyle = `rgba(126,87,194,${0.2 + (index/trail.length)*0.5})`;
-        ctx.fill();
+      document.getElementById('length').addEventListener('input', function() {
+        length = parseInt(this.value);
+        updatePeriod();
+      });
+      document.getElementById('gravity').addEventListener('input', function() {
+        gravity = parseFloat(this.value);
+        updatePeriod();
+      });
+      document.getElementById('mass').addEventListener('input', function() {
+        mass = parseFloat(this.value);
+      });
+      document.getElementById('damping').addEventListener('input', function() {
+        damping = parseFloat(this.value);
       });
 
-      // Draw rod
-      ctx.beginPath();
-      ctx.moveTo(origin.x, origin.y);
-      ctx.lineTo(bobX, bobY);
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = "#3949ab";
-      ctx.stroke();
-
-      // Draw bob
-      ctx.beginPath();
-      ctx.arc(bobX, bobY, bobRadius, 0, 2 * Math.PI);
-      ctx.fillStyle = "#7e57c2";
-      ctx.fill();
-      ctx.strokeStyle = "#5e35b1";
-      ctx.stroke();
-
-      // Update trail
-      trail.push({x: bobX, y: bobY});
-      if (trail.length > 30) trail.shift();
-
-      // Energy display
-      const potential = mass * gravity * (length - length * Math.cos(angle));
-      const kinetic = 0.5 * mass * (length * angleVel) ** 2;
-      document.getElementById('energyDisplay').innerHTML = `
-        PE: ${potential.toFixed(1)} J<br>
-        KE: ${kinetic.toFixed(1)} J<br>
-        Total: ${(potential + kinetic).toFixed(1)} J
-      `;
-    }
-
-    function updatePendulum() {
-      if (!isDragging) {
-        angleAcc = (-gravity / length) * Math.sin(angle);
-        angleVel += angleAcc;
-        angleVel *= 0.995; // damping
-        angle += angleVel;
+      function updatePeriod() {
+        // Period for small angles
+        let T = 2 * Math.PI * Math.sqrt(length / gravity);
+        document.getElementById('periodDisplay').textContent = `Period: ${T.toFixed(2)} s`;
       }
-    }
 
-    function animate() {
-      updatePendulum();
-      drawPendulum();
-      requestAnimationFrame(animate);
-    }
+      function drawPendulum() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let bobX = origin.x + length * Math.sin(angle);
+        let bobY = origin.y + length * Math.cos(angle);
 
-    document.getElementById('length').addEventListener('input', function() {
-      length = parseInt(this.value);
-    });
-    document.getElementById('gravity').addEventListener('input', function() {
-      gravity = parseFloat(this.value);
-    });
+        // Draw angle arc (protractor)
+        ctx.beginPath();
+        ctx.arc(origin.x, origin.y, 40, Math.PI / 2, Math.PI / 2 + angle, angle > 0);
+        ctx.strokeStyle = "#fbc02d";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.lineWidth = 1;
 
-    function resetPendulum() {
-      angle = Math.PI / 4;
-      angleVel = 0;
-      trail = [];
-    }
+        // Draw angle text
+        ctx.save();
+        ctx.translate(origin.x, origin.y);
+        ctx.rotate(angle / 2);
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#fbc02d";
+        ctx.fillText((angle * 180 / Math.PI).toFixed(1) + "°", 45, -10);
+        ctx.restore();
 
-    // Drag to set angle
-    canvas.addEventListener('mousedown', startDrag);
-    canvas.addEventListener('mousemove', drag);
-    canvas.addEventListener('mouseup', endDrag);
-    canvas.addEventListener('mouseleave', endDrag);
+        // Draw trail
+        trail.forEach((pos, index) => {
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, bobRadius * (index/trail.length), 0, 2 * Math.PI);
+          ctx.fillStyle = `rgba(126,87,194,${0.2 + (index/trail.length)*0.5})`;
+          ctx.fill();
+        });
 
-    function startDrag(e) {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const bobX = origin.x + length * Math.sin(angle);
-      const bobY = origin.y + length * Math.cos(angle);
-      const dx = mouseX - bobX;
-      const dy = mouseY - bobY;
-      if (Math.sqrt(dx*dx + dy*dy) < bobRadius + 10) {
-        isDragging = true;
+        // Draw rod
+        ctx.beginPath();
+        ctx.moveTo(origin.x, origin.y);
+        ctx.lineTo(bobX, bobY);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#3949ab";
+        ctx.stroke();
+
+        // Draw bob
+        ctx.beginPath();
+        ctx.arc(bobX, bobY, bobRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#7e57c2";
+        ctx.fill();
+        ctx.strokeStyle = "#5e35b1";
+        ctx.stroke();
+
+        // Update trail
+        trail.push({x: bobX, y: bobY});
+        if (trail.length > 30) trail.shift();
+
+        // Energy display
+        const potential = mass * gravity * (length - length * Math.cos(angle));
+        const kinetic = 0.5 * mass * (length * angleVel) ** 2;
+        document.getElementById('energyDisplay').innerHTML = `
+          PE: ${potential.toFixed(1)} J<br>
+          KE: ${kinetic.toFixed(1)} J<br>
+          Total: ${(potential + kinetic).toFixed(1)} J
+        `;
+      }
+
+      function updatePendulum() {
+        if (!isDragging) {
+          angleAcc = (-gravity / length) * Math.sin(angle);
+          angleVel += angleAcc;
+          angleVel *= damping; // damping
+          angle += angleVel;
+        }
+      }
+
+      function animate() {
+        updatePendulum();
+        drawPendulum();
+        requestAnimationFrame(animate);
+      }
+
+      window.resetPendulum = function() {
+        angle = Math.PI / 4;
         angleVel = 0;
+        trail = [];
+      };
+
+      // Drag to set angle
+      canvas.addEventListener('mousedown', startDrag);
+      canvas.addEventListener('mousemove', drag);
+      canvas.addEventListener('mouseup', endDrag);
+      canvas.addEventListener('mouseleave', endDrag);
+
+      function startDrag(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const bobX = origin.x + length * Math.sin(angle);
+        const bobY = origin.y + length * Math.cos(angle);
+        const dx = mouseX - bobX;
+        const dy = mouseY - bobY;
+        if (Math.sqrt(dx*dx + dy*dy) < bobRadius + 10) {
+          isDragging = true;
+          angleVel = 0;
+        }
       }
-    }
 
-    function drag(e) {
-      if (!isDragging) return;
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const dx = mouseX - origin.x;
-      const dy = mouseY - origin.y;
-      angle = Math.atan2(dx, dy);
-      trail = [];
-    }
+      function drag(e) {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const dx = mouseX - origin.x;
+        const dy = mouseY - origin.y;
+        angle = Math.atan2(dx, dy);
+        trail = [];
+      }
 
-    function endDrag() {
-      isDragging = false;
-    }
+      function endDrag() {
+        isDragging = false;
+      }
 
-    animate();
+      updatePeriod();
+      animate();
+    });
   </script>
 </body>
 </html>

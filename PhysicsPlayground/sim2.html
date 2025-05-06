@@ -13,7 +13,7 @@
       <div class="electron"></div>
     </div>
   </div>
-  <button class="theme-toggle" onclick="toggleTheme()">
+  <button class="theme-toggle" id="themeToggleBtn">
     <span id="themeIcon">🌙</span>
   </button>
   <header>
@@ -26,7 +26,7 @@
     </div>
     <div class="controls">
       <label>Angle: <input type="range" id="angle" min="15" max="75" value="45"> <span id="angleVal">45</span>°</label>
-      <label>Speed: <input type="range" id="speed" min="20" max="80" value="50"> <span id="speedVal">50</span></label>
+      <label>Speed: <input type="range" id="speed" min="10" max="100" value="50"> <span id="speedVal">50</span></label>
       <label><input type="checkbox" id="airResistance"> Air Resistance</label>
       <button onclick="launch()">Launch</button>
       <button onclick="resetProjectile()">Reset</button>
@@ -34,116 +34,138 @@
     <a href="index.html">← Back to Home</a>
   </main>
   <script>
-    // Loader
-    window.addEventListener('load', () => {
-      document.querySelector('.loader').classList.add('hidden');
-    });
-
-    // Theme management
-    function toggleTheme() {
-      document.body.setAttribute('data-theme',
-        document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-      );
-      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+    document.addEventListener('DOMContentLoaded', function() {
+      // Loader
+      window.addEventListener('load', () => {
+        document.querySelector('.loader').classList.add('hidden');
+      });
+      // Theme toggle
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
       document.getElementById('themeIcon').textContent =
-        document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-    }
-    // Initialize theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.body.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeIcon').textContent =
-      savedTheme === 'dark' ? '☀️' : '🌙';
+        savedTheme === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeToggleBtn').onclick = function() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+      };
 
-    // Projectile simulation
-    const canvas = document.getElementById('projCanvas');
-    const ctx = canvas.getContext('2d');
-    let gravity = 9.8;
-    let angle = 45;
-    let speed = 50;
-    let airResistance = false;
-    let x0 = 40, y0 = canvas.height - 40;
-    let projectiles = [];
+      // Projectile simulation
+      const canvas = document.getElementById('projCanvas');
+      const ctx = canvas.getContext('2d');
+      let gravity = 9.8;
+      let angle = 45;
+      let speed = 50;
+      let airResistance = false;
+      let x0 = 40, y0 = canvas.height - 40;
+      let projectiles = [];
+      let restitution = 0.7; // bounciness
+      let wallX = canvas.width - 20;
 
-    document.getElementById('angle').addEventListener('input', function() {
-      angle = parseInt(this.value);
-      document.getElementById('angleVal').textContent = angle;
-    });
-    document.getElementById('speed').addEventListener('input', function() {
-      speed = parseInt(this.value);
-      document.getElementById('speedVal').textContent = speed;
-    });
-    document.getElementById('airResistance').addEventListener('change', function() {
-      airResistance = this.checked;
-    });
-
-    function launch() {
-      let rad = angle * Math.PI / 180;
-      projectiles.push({
-        x: x0, y: y0,
-        vx: speed * Math.cos(rad),
-        vy: -speed * Math.sin(rad),
-        trail: [],
-        alive: true
+      document.getElementById('angle').addEventListener('input', function() {
+        angle = parseInt(this.value);
+        document.getElementById('angleVal').textContent = angle;
       });
-    }
+      document.getElementById('speed').addEventListener('input', function() {
+        speed = parseInt(this.value);
+        document.getElementById('speedVal').textContent = speed;
+      });
+      document.getElementById('airResistance').addEventListener('change', function() {
+        airResistance = this.checked;
+      });
 
-    function resetProjectile() {
-      projectiles = [];
-      drawProjectile();
-    }
-
-    function updateProjectile(p) {
-      if (!p.alive) return;
-      if (airResistance) {
-        const drag = 0.01;
-        p.vx *= (1 - drag);
-        p.vy *= (1 - drag);
-        p.vy += gravity * 0.04;
-      } else {
-        p.vy += gravity * 0.04;
-      }
-      p.x += p.vx * 0.04;
-      p.y += p.vy * 0.04;
-      p.trail.push({x: p.x, y: p.y});
-      if (p.trail.length > 50) p.trail.shift();
-      if (p.y >= y0) {
-        p.y = y0;
-        p.alive = false;
-      }
-    }
-
-    function drawProjectile() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw ground
-      ctx.fillStyle = "#c5e1a5";
-      ctx.fillRect(0, y0 + 20, canvas.width, canvas.height - y0 - 20);
-      // Draw all projectiles
-      projectiles.forEach((p) => {
-        // Draw trail
-        p.trail.forEach((pos, i) => {
-          ctx.beginPath();
-          ctx.arc(pos.x, pos.y, 6 * (i/p.trail.length), 0, 2 * Math.PI);
-          ctx.fillStyle = `rgba(255,112,67,${0.2 + (i/p.trail.length)*0.5})`;
-          ctx.fill();
+      window.launch = function() {
+        let rad = angle * Math.PI / 180;
+        projectiles.push({
+          x: x0, y: y0,
+          vx: speed * Math.cos(rad),
+          vy: -speed * Math.sin(rad),
+          trail: [],
+          alive: true
         });
-        // Draw projectile
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 12, 0, 2 * Math.PI);
-        ctx.fillStyle = "#ff7043";
-        ctx.fill();
-        ctx.strokeStyle = "#d84315";
-        ctx.stroke();
-      });
-    }
+      };
 
-    function animate() {
-      projectiles.forEach(updateProjectile);
-      drawProjectile();
-      requestAnimationFrame(animate);
-    }
+      window.resetProjectile = function() {
+        projectiles = [];
+        drawProjectile();
+      };
 
-    resetProjectile();
-    animate();
+      function updateProjectile(p) {
+        if (!p.alive) return;
+        let dt = 0.02; // smaller time step for smoother/faster motion
+        if (airResistance) {
+          const drag = 0.01;
+          p.vx *= (1 - drag);
+          p.vy *= (1 - drag);
+          p.vy += gravity * dt;
+        } else {
+          p.vy += gravity * dt;
+        }
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.trail.push({x: p.x, y: p.y});
+        if (p.trail.length > 50) p.trail.shift();
+
+        // Collision with ground
+        if (p.y >= y0) {
+          p.y = y0;
+          if (Math.abs(p.vy) > 1) {
+            p.vy = -p.vy * restitution;
+            p.vx *= 0.98; // friction
+          } else {
+            p.alive = false;
+          }
+        }
+        // Collision with right wall
+        if (p.x >= wallX) {
+          p.x = wallX;
+          if (Math.abs(p.vx) > 1) {
+            p.vx = -p.vx * restitution;
+            p.vy *= 0.98;
+          } else {
+            p.alive = false;
+          }
+        }
+      }
+
+      function drawProjectile() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw ground
+        ctx.fillStyle = "#c5e1a5";
+        ctx.fillRect(0, y0 + 20, canvas.width, canvas.height - y0 - 20);
+        // Draw wall
+        ctx.fillStyle = "#bdbdbd";
+        ctx.fillRect(wallX, 0, 10, y0 + 20);
+
+        // Draw all projectiles
+        projectiles.forEach((p) => {
+          // Draw trail
+          p.trail.forEach((pos, i) => {
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 6 * (i/p.trail.length), 0, 2 * Math.PI);
+            ctx.fillStyle = `rgba(255,112,67,${0.2 + (i/p.trail.length)*0.5})`;
+            ctx.fill();
+          });
+          // Draw projectile
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 12, 0, 2 * Math.PI);
+          ctx.fillStyle = "#ff7043";
+          ctx.fill();
+          ctx.strokeStyle = "#d84315";
+          ctx.stroke();
+        });
+      }
+
+      function animate() {
+        projectiles.forEach(updateProjectile);
+        drawProjectile();
+        requestAnimationFrame(animate);
+      }
+
+      window.resetProjectile();
+      animate();
+    });
   </script>
 </body>
 </html>
