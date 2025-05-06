@@ -1,0 +1,66 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+    margin: 0;
+    min-height: 100vh;
+    color: #1a237e;
+  }
+  
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem 1rem;
+    background: #3f51b5;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(63,81,181,0.08);
+  }
+  
+  header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+  }
+  
+  header p {
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    color: #c5cae9;
+  }
+  
+  .sim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    margin: 3rem 2rem;
+  }
+  
+  .sim-card {
+    background: #f0f4ff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    padding: 2.5rem 1rem;
+    text-align: center;
+    font-size: 1.25rem;
+    text-decoration: none;
+    color: #1a237e;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+  }
+  .sim-card:hover, .sim-card:focus {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 8px 32px rgba(26,35,126,0.18);
+    background: #d1c4e9;
+    color: #311b92;
+  }
+  
+  footer {
+    text-align: center;
+    padding: 1rem;
+    color: #536dfe;
+    background: #ede7f6;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    font-size: 1rem;
+  }
+  

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spring Oscillator | Physics Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sim-container { text-align: center; margin: 2rem auto; }
+    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
+    .controls { margin: 1.5rem 0; }
+    .controls label { margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Spring Oscillator</h1>
+    <p>Simulate Hooke's Law in action!</p>
+  </header>
+  <main>
+    <div class="sim-container">
+      <canvas id="springCanvas" width="400" height="350"></canvas>
+      <div class="controls">
+        <label>Mass: <input type="range" id="mass" min="1" max="10" value="3"> <span id="massVal">3</span>kg</label>
+        <label>k: <input type="range" id="k" min="10" max="50" value="20"> <span id="kVal">20</span>N/m</label>
+        <button onclick="resetSpring()">Reset</button>
+      </div>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById('springCanvas');
+    const ctx = canvas.getContext('2d');
+    let mass = 3;
+    let k = 20;
+    let x = 80; // displacement from equilibrium
+    let v = 0;
+    let a = 0;
+    let originY = 80;
+    let equilibriumY = originY + 100;
+    let g = 9.8;
+
+    document.getElementById('mass').addEventListener('input', function() {
+      mass = parseFloat(this.value);
+      document.getElementById('massVal').textContent = mass;
+    });
+    document.getElementById('k').addEventListener('input', function() {
+      k = parseFloat(this.value);
+      document.getElementById('kVal').textContent = k;
+    });
+
+    function drawSpring() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw ceiling
+      ctx.fillStyle = "#90caf9";
+      ctx.fillRect(150, originY - 10, 100, 10);
+      // Draw spring (zigzag)
+      ctx.strokeStyle = "#1976d2";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(200, originY);
+      let coils = 10, coilHeight = (equilibriumY + x - originY) / coils;
+      for (let i = 1; i <= coils; i++) {
+        let dx = (i % 2 === 0) ? -15 : 15;
+        ctx.lineTo(200 + dx, originY + i * coilHeight);
+      }
+      ctx.lineTo(200, equilibriumY + x);
+      ctx.stroke();
+      // Draw mass
+      ctx.fillStyle = "#fbc02d";
+      ctx.fillRect(175, equilibriumY + x, 50, 35);
+      ctx.strokeStyle = "#f57c00";
+      ctx.strokeRect(175, equilibriumY + x, 50, 35);
+    }
+
+    function updateSpring() {
+      // F = -kx - mg (down is positive)
+      let force = -k * x + mass * g;
+      a = force / mass;
+      v += a * 0.04;
+      v *= 0.99; // damping
+      x += v * 0.04;
+    }
+
+    function animate() {
+      updateSpring();
+      drawSpring();
+      requestAnimationFrame(animate);
+    }
+
+    function resetSpring() {
+      x = 80;
+      v = 0;
+    }
+
+    animate();
+  </script>
+</body>
+</html>

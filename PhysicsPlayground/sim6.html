@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wave Interference | Physics Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sim-container { text-align: center; margin: 2rem auto; }
+    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
+    .controls { margin: 1.5rem 0; }
+    .controls label { margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Wave Interference</h1>
+    <p>See how waves combine and interact!</p>
+  </header>
+  <main>
+    <div class="sim-container">
+      <canvas id="waveCanvas" width="420" height="320"></canvas>
+      <div class="controls">
+        <label>Wavelength: <input type="range" id="wavelength" min="20" max="80" value="40"> <span id="wlVal">40</span> px</label>
+        <label>Source Distance: <input type="range" id="srcDist" min="40" max="160" value="80"> <span id="sdVal">80</span> px</label>
+      </div>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    let wavelength = 40;
+    let srcDist = 80;
+
+    document.getElementById('wavelength').addEventListener('input', function() {
+      wavelength = parseInt(this.value);
+      document.getElementById('wlVal').textContent = wavelength;
+    });
+    document.getElementById('srcDist').addEventListener('input', function() {
+      srcDist = parseInt(this.value);
+      document.getElementById('sdVal').textContent = srcDist;
+    });
+
+    function drawWaves() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw sources
+      let src1 = {x: 120, y: 160 - srcDist/2};
+      let src2 = {x: 120, y: 160 + srcDist/2};
+      ctx.fillStyle = "#1976d2";
+      ctx.beginPath();
+      ctx.arc(src1.x, src1.y, 7, 0, 2 * Math.PI);
+      ctx.arc(src2.x, src2.y, 7, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = "#222";
+      ctx.fillText("S1", src1.x - 18, src1.y - 8);
+      ctx.fillText("S2", src2.x - 18, src2.y - 8);
+      // Draw interference pattern (dots)
+      for (let x = 180; x < 400; x += 6) {
+        for (let y = 20; y < 300; y += 6) {
+          let r1 = Math.hypot(x - src1.x, y - src1.y);
+          let r2 = Math.hypot(x - src2.x, y - src2.y);
+          let phase = ((r1 - r2) / wavelength) * 2 * Math.PI;
+          let intensity = 0.5 + 0.5 * Math.cos(phase);
+          let color = `rgba(255,87,34,${intensity})`;
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, 4, 4);
+        }
+      }
+    }
+
+    function animate() {
+      drawWaves();
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

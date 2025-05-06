@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Optics Lab | Physics Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sim-container { text-align: center; margin: 2rem auto; }
+    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
+    .controls { margin: 1.5rem 0; }
+    .controls label { margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Optics Lab</h1>
+    <p>Experiment with a convex lens!</p>
+  </header>
+  <main>
+    <div class="sim-container">
+      <canvas id="opticsCanvas" width="500" height="320"></canvas>
+      <div class="controls">
+        <label>Object Distance: <input type="range" id="objDist" min="60" max="220" value="120"> <span id="objDistVal">120</span> px</label>
+        <label>Focal Length: <input type="range" id="focalLen" min="40" max="100" value="70"> <span id="focalLenVal">70</span> px</label>
+      </div>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById('opticsCanvas');
+    const ctx = canvas.getContext('2d');
+    let objDist = 120;
+    let focalLen = 70;
+    const lensX = 250;
+    const baseY = 160;
+
+    document.getElementById('objDist').addEventListener('input', function() {
+      objDist = parseInt(this.value);
+      document.getElementById('objDistVal').textContent = objDist;
+    });
+    document.getElementById('focalLen').addEventListener('input', function() {
+      focalLen = parseInt(this.value);
+      document.getElementById('focalLenVal').textContent = focalLen;
+    });
+
+    function drawOptics() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Principal axis
+      ctx.strokeStyle = "#aaa";
+      ctx.beginPath();
+      ctx.moveTo(0, baseY);
+      ctx.lineTo(canvas.width, baseY);
+      ctx.stroke();
+      // Lens
+      ctx.strokeStyle = "#1976d2";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(lensX, baseY - 60);
+      ctx.bezierCurveTo(lensX + 20, baseY - 40, lensX + 20, baseY + 40, lensX, baseY + 60);
+      ctx.moveTo(lensX, baseY - 60);
+      ctx.bezierCurveTo(lensX - 20, baseY - 40, lensX - 20, baseY + 40, lensX, baseY + 60);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      // Focal points
+      ctx.fillStyle = "#388e3c";
+      ctx.beginPath();
+      ctx.arc(lensX - focalLen, baseY, 4, 0, 2 * Math.PI);
+      ctx.arc(lensX + focalLen, baseY, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = "#222";
+      ctx.fillText("F", lensX - focalLen - 10, baseY - 10);
+      ctx.fillText("F'", lensX + focalLen + 4, baseY - 10);
+      // Object
+      ctx.strokeStyle = "#f44336";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(lensX - objDist, baseY);
+      ctx.lineTo(lensX - objDist, baseY - 50);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(lensX - objDist, baseY - 50, 7, 0, 2 * Math.PI);
+      ctx.fillStyle = "#f44336";
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#222";
+      ctx.fillText("Object", lensX - objDist - 18, baseY - 60);
+      // Image (using lens formula)
+      let do_ = objDist;
+      let f = focalLen;
+      let di = (do_ * f) / (do_ - f);
+      let hi = -50 * di / do_;
+      // Draw image
+      ctx.strokeStyle = "#7e57c2";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(lensX + di, baseY);
+      ctx.lineTo(lensX + di, baseY - hi);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(lensX + di, baseY - hi, 7, 0, 2 * Math.PI);
+      ctx.fillStyle = "#7e57c2";
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#222";
+      ctx.fillText("Image", lensX + di + 8, baseY - hi - 8);
+      // Rays
+      ctx.strokeStyle = "#009688";
+      ctx.setLineDash([4, 2]);
+      // Ray 1: parallel to axis, then through F'
+      ctx.beginPath();
+      ctx.moveTo(lensX - objDist, baseY - 50);
+      ctx.lineTo(lensX, baseY - 50);
+      ctx.lineTo(lensX + di, baseY - hi);
+      ctx.stroke();
+      // Ray 2: through center of lens
+      ctx.beginPath();
+      ctx.moveTo(lensX - objDist, baseY - 50);
+      ctx.lineTo(lensX + di, baseY - hi);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function animate() {
+      drawOptics();
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Projectile Motion | Physics Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sim-container { text-align: center; margin: 2rem auto; }
+    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
+    .controls { margin: 1.5rem 0; }
+    .controls label { margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Projectile Motion</h1>
+    <p>Visualize parabolic trajectories!</p>
+  </header>
+  <main>
+    <div class="sim-container">
+      <canvas id="projCanvas" width="480" height="320"></canvas>
+      <div class="controls">
+        <label>Angle: <input type="range" id="angle" min="15" max="75" value="45"> <span id="angleVal">45</span>°</label>
+        <label>Speed: <input type="range" id="speed" min="20" max="80" value="50"> <span id="speedVal">50</span></label>
+        <button onclick="launch()">Launch</button>
+        <button onclick="resetProjectile()">Reset</button>
+      </div>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById('projCanvas');
+    const ctx = canvas.getContext('2d');
+    let gravity = 9.8;
+    let angle = 45;
+    let speed = 50;
+    let launched = false;
+    let t = 0;
+    let x0 = 40, y0 = canvas.height - 40;
+    let x = x0, y = y0;
+    let vx, vy;
+
+    document.getElementById('angle').addEventListener('input', function() {
+      angle = parseInt(this.value);
+      document.getElementById('angleVal').textContent = angle;
+    });
+    document.getElementById('speed').addEventListener('input', function() {
+      speed = parseInt(this.value);
+      document.getElementById('speedVal').textContent = speed;
+    });
+
+    function drawProjectile() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw ground
+      ctx.fillStyle = "#c5e1a5";
+      ctx.fillRect(0, y0 + 20, canvas.width, canvas.height - y0 - 20);
+      // Draw projectile
+      ctx.beginPath();
+      ctx.arc(x, y, 12, 0, 2 * Math.PI);
+      ctx.fillStyle = "#ff7043";
+      ctx.fill();
+      ctx.strokeStyle = "#d84315";
+      ctx.stroke();
+    }
+
+    function launch() {
+      launched = true;
+      t = 0;
+      x = x0;
+      y = y0;
+      let rad = angle * Math.PI / 180;
+      vx = speed * Math.cos(rad);
+      vy = -speed * Math.sin(rad);
+    }
+
+    function resetProjectile() {
+      launched = false;
+      t = 0;
+      x = x0;
+      y = y0;
+      drawProjectile();
+    }
+
+    function animate() {
+      if (launched) {
+        t += 0.04;
+        x = x0 + vx * t;
+        y = y0 + vy * t + 0.5 * gravity * t * t;
+        if (y >= y0) {
+          y = y0;
+          launched = false;
+        }
+      }
+      drawProjectile();
+      requestAnimationFrame(animate);
+    }
+
+    resetProjectile();
+    animate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pendulum Simulator | Physics Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sim-container { text-align: center; margin: 2rem auto; }
+    canvas { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #bdbdbd; }
+    .controls { margin: 1.5rem 0; }
+    .controls label { margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pendulum Simulator</h1>
+    <p>Explore simple harmonic motion!</p>
+  </header>
+  <main>
+    <div class="sim-container">
+      <canvas id="pendulumCanvas" width="400" height="350"></canvas>
+      <div class="controls">
+        <label>Length: <input type="range" id="length" min="100" max="250" value="200"></label>
+        <label>Gravity: <input type="range" id="gravity" min="5" max="20" value="10"></label>
+        <button onclick="resetPendulum()">Reset</button>
+      </div>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById('pendulumCanvas');
+    const ctx = canvas.getContext('2d');
+    let length = 200;
+    let gravity = 10;
+    let angle = Math.PI / 4;
+    let angleVel = 0;
+    let angleAcc = 0;
+    let origin = { x: 200, y: 60 };
+    let bobRadius = 25;
+
+    function drawPendulum() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let bobX = origin.x + length * Math.sin(angle);
+      let bobY = origin.y + length * Math.cos(angle);
+      // Draw rod
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(bobX, bobY);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#3949ab";
+      ctx.stroke();
+      // Draw bob
+      ctx.beginPath();
+      ctx.arc(bobX, bobY, bobRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = "#7e57c2";
+      ctx.fill();
+      ctx.strokeStyle = "#5e35b1";
+      ctx.stroke();
+    }
+
+    function updatePendulum() {
+      angleAcc = (-gravity / length) * Math.sin(angle);
+      angleVel += angleAcc;
+      angleVel *= 0.995; // damping
+      angle += angleVel;
+    }
+
+    function animate() {
+      updatePendulum();
+      drawPendulum();
+      requestAnimationFrame(animate);
+    }
+
+    document.getElementById('length').addEventListener('input', function() {
+      length = parseInt(this.value);
+    });
+    document.getElementById('gravity').addEventListener('input', function() {
+      gravity = parseFloat(this.value);
+    });
+
+    function resetPendulum() {
+      angle = Math.PI / 4;
+      angleVel = 0;
+    }
+
+    animate();
+  </script>
+</body>
+</html>
