@@ -131,7 +131,7 @@
       // Projectile simulation with collision
       const canvas = document.getElementById('projCanvas');
       const ctx = canvas.getContext('2d');
-      let gravity = 9.8;
+      let gravity = 30; // More realistic for this scale
       let angle = 45;
       let speed = 50;
       let airResistance = false;
@@ -184,7 +184,7 @@
         if (!p.alive) return;
         let dt = 0.012; // smaller time step for realistic speed
         if (airResistance) {
-          const drag = 0.012;
+          const drag = 0.002; // much less air resistance
           p.vx *= (1 - drag);
           p.vy *= (1 - drag);
           p.vy += gravity * dt;
