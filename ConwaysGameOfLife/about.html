@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About – Conway’s Game of Life</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Game</a>
+      <a href="about.html">About</a>
+      <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank">GitHub</a>
+    </nav>
+    <h1>About Conway’s Game of Life</h1>
+  </header>
+  <main>
+    <section class="about-section">
+      <h2>What is Conway’s Game of Life?</h2>
+      <p>
+        Conway’s Game of Life is a cellular automaton devised by mathematician John Horton Conway in 1970. It’s a zero-player game, meaning its evolution is determined by its initial state, requiring no further input.
+      </p>
+      <h3>How it works:</h3>
+      <ul>
+        <li>The "game" consists of a grid of cells, each of which can be alive or dead.</li>
+        <li>Each cell interacts with its eight neighbors, which are the cells that are horizontally, vertically, or diagonally adjacent.</li>
+        <li>At each step in time, the following transitions occur:</li>
+        <ul>
+          <li>Any live cell with fewer than two live neighbors dies (underpopulation).</li>
+          <li>Any live cell with two or three live neighbors lives on to the next generation.</li>
+          <li>Any live cell with more than three live neighbors dies (overpopulation).</li>
+          <li>Any dead cell with exactly three live neighbors becomes a live cell (reproduction).</li>
+        </ul>
+      </ul>
+      <h3>Why is it interesting?</h3>
+      <p>
+        Despite its simple rules, the Game of Life can produce incredibly complex patterns, including oscillators, spaceships, and even patterns that simulate computation. It’s a classic example of how complexity can emerge from simplicity.
+      </p>
+      <h3>Learn more:</h3>
+      <ul>
+        <li><a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank">Wikipedia: Conway's Game of Life</a></li>
+        <li><a href="https://playgameoflife.com/" target="_blank">Online Demo</a></li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <span>Inspired by John Conway’s classic. Crafted with ❤️</span>
+  </footer>
+</body>
+</html>
