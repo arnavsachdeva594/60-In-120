@@ -31,7 +31,6 @@ function drawGrid() {
   }
   // Draw grid lines
   ctx.strokeStyle = GRID_COLOR;
-  ctx.lineWidth = 1;
   for (let x = 0; x <= cols; x++) {
     ctx.beginPath();
     ctx.moveTo(x * CELL_SIZE, 0);
@@ -106,19 +105,13 @@ document.getElementById('pause').onclick = pause;
 document.getElementById('step').onclick = step;
 document.getElementById('reset').onclick = reset;
 document.getElementById('random').onclick = randomize;
-
-const speedSlider = document.getElementById('speed');
-const speedValue = document.getElementById('speedValue');
-
-speedSlider.oninput = (e) => {
+document.getElementById('speed').oninput = (e) => {
   speed = +e.target.value;
-  speedValue.textContent = speed;
   if (running) {
     pause();
     start();
   }
 };
-speedValue.textContent = speed;
 
 // Toggle cells on click
 canvas.addEventListener('mousedown', function(e) {
