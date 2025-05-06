@@ -4,6 +4,75 @@
   <meta charset="UTF-8">
   <title>Projectile Motion | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    .canvas-container {
+      background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
+      border-radius: 1.5rem;
+      box-shadow: 0 6px 32px rgba(63,81,181,0.10);
+      margin: 2rem auto 1rem auto;
+      padding: 2rem 1rem 1rem 1rem;
+      width: fit-content;
+      position: relative;
+      max-width: 95vw;
+    }
+    [data-theme="dark"] .canvas-container {
+      background: linear-gradient(135deg, #23243a 0%, #1e1e1e 100%);
+    }
+    .controls-card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem 2rem;
+      align-items: center;
+      justify-content: center;
+      margin: 1.5rem auto 2rem auto;
+      padding: 1.5rem 2rem;
+      max-width: 800px;
+    }
+    .controls-card label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .controls-card input[type="range"] {
+      accent-color: #ff7043;
+      width: 100px;
+    }
+    .controls-card .value {
+      font-weight: bold;
+      color: #ff7043;
+      min-width: 2.5em;
+      display: inline-block;
+      text-align: right;
+    }
+    [data-theme="dark"] .controls-card .value {
+      color: #ffab91;
+    }
+    .reset-btn {
+      background: #ff7043;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px var(--shadow);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .reset-btn:hover { background: #d84315; }
+    @media (max-width: 700px) {
+      .controls-card { flex-direction: column; gap: 1rem; padding: 1rem; }
+      .canvas-container { padding: 1rem 0.5rem 0.5rem 0.5rem; }
+    }
+  </style>
 </head>
 <body>
   <div class="loader">
@@ -18,18 +87,26 @@
   </button>
   <header>
     <h1>Projectile Motion</h1>
-    <p>Visualize parabolic trajectories! Try launching multiple projectiles.</p>
+    <p>Visualize parabolic trajectories! Balls now bounce and collide.</p>
   </header>
   <main>
     <div class="canvas-container">
-      <canvas id="projCanvas" width="480" height="320"></canvas>
+      <canvas id="projCanvas" width="600" height="350"></canvas>
     </div>
-    <div class="controls">
-      <label>Angle: <input type="range" id="angle" min="15" max="75" value="45"> <span id="angleVal">45</span>°</label>
-      <label>Speed: <input type="range" id="speed" min="10" max="100" value="50"> <span id="speedVal">50</span></label>
-      <label><input type="checkbox" id="airResistance"> Air Resistance</label>
-      <button onclick="launch()">Launch</button>
-      <button onclick="resetProjectile()">Reset</button>
+    <div class="controls-card">
+      <label>Angle
+        <input type="range" id="angle" min="15" max="75" value="45">
+        <span class="value" id="angleVal">45</span>°
+      </label>
+      <label>Speed
+        <input type="range" id="speed" min="10" max="300" value="50">
+        <span class="value" id="speedVal">50</span> m/s
+      </label>
+      <label>
+        <input type="checkbox" id="airResistance"> Air Resistance
+      </label>
+      <button class="reset-btn" id="clearBtn" title="Clear"><i class="fas fa-trash"></i></button>
+      <button class="reset-btn" id="launchBtn" title="Launch"><i class="fas fa-arrow-up"></i></button>
     </div>
     <a href="index.html">← Back to Home</a>
   </main>
@@ -51,7 +128,7 @@
         document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
       };
 
-      // Projectile simulation
+      // Projectile simulation with collision
       const canvas = document.getElementById('projCanvas');
       const ctx = canvas.getContext('2d');
       let gravity = 9.8;
@@ -60,42 +137,54 @@
       let airResistance = false;
       let x0 = 40, y0 = canvas.height - 40;
       let projectiles = [];
-      let restitution = 0.7; // bounciness
+      let restitution = 0.75; // bounciness
       let wallX = canvas.width - 20;
+      const ballRadius = 14;
 
-      document.getElementById('angle').addEventListener('input', function() {
-        angle = parseInt(this.value);
+      function updateLabels() {
         document.getElementById('angleVal').textContent = angle;
+        document.getElementById('speedVal').textContent = speed;
+      }
+      document.getElementById('angle').addEventListener('input', function() {
+        angle = parseInt(this.value); updateLabels();
       });
       document.getElementById('speed').addEventListener('input', function() {
-        speed = parseInt(this.value);
-        document.getElementById('speedVal').textContent = speed;
+        speed = parseInt(this.value); updateLabels();
       });
       document.getElementById('airResistance').addEventListener('change', function() {
         airResistance = this.checked;
       });
 
-      window.launch = function() {
+      document.getElementById('launchBtn').onclick = function() { launch(); };
+      document.getElementById('clearBtn').onclick = function() { resetProjectile(); };
+
+      function launch() {
         let rad = angle * Math.PI / 180;
         projectiles.push({
           x: x0, y: y0,
           vx: speed * Math.cos(rad),
           vy: -speed * Math.sin(rad),
           trail: [],
-          alive: true
+          alive: true,
+          color: randomColor()
         });
-      };
+      }
 
-      window.resetProjectile = function() {
+      function resetProjectile() {
         projectiles = [];
         drawProjectile();
-      };
+      }
+
+      function randomColor() {
+        const palette = ["#ff7043","#42a5f5","#7e57c2","#26a69a","#fbc02d","#ab47bc"];
+        return palette[Math.floor(Math.random() * palette.length)];
+      }
 
       function updateProjectile(p) {
         if (!p.alive) return;
-        let dt = 0.02; // smaller time step for smoother/faster motion
+        let dt = 0.012; // smaller time step for realistic speed
         if (airResistance) {
-          const drag = 0.01;
+          const drag = 0.012;
           p.vx *= (1 - drag);
           p.vy *= (1 - drag);
           p.vy += gravity * dt;
@@ -108,23 +197,63 @@
         if (p.trail.length > 50) p.trail.shift();
 
         // Collision with ground
-        if (p.y >= y0) {
-          p.y = y0;
+        if (p.y >= y0 - ballRadius) {
+          p.y = y0 - ballRadius;
           if (Math.abs(p.vy) > 1) {
             p.vy = -p.vy * restitution;
             p.vx *= 0.98; // friction
           } else {
+            p.vy = 0;
             p.alive = false;
           }
         }
         // Collision with right wall
-        if (p.x >= wallX) {
-          p.x = wallX;
+        if (p.x >= wallX - ballRadius) {
+          p.x = wallX - ballRadius;
           if (Math.abs(p.vx) > 1) {
             p.vx = -p.vx * restitution;
             p.vy *= 0.98;
           } else {
+            p.vx = 0;
             p.alive = false;
+          }
+        }
+        // Collision with left wall
+        if (p.x <= ballRadius) {
+          p.x = ballRadius;
+          p.vx = -p.vx * restitution;
+        }
+      }
+
+      // Ball-to-ball collision detection and response (elastic)
+      function handleCollisions() {
+        for (let i = 0; i < projectiles.length; ++i) {
+          for (let j = i + 1; j < projectiles.length; ++j) {
+            let a = projectiles[i], b = projectiles[j];
+            if (!a.alive && !b.alive) continue;
+            let dx = b.x - a.x, dy = b.y - a.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 2 * ballRadius && dist > 0) {
+              // Resolve overlap
+              let overlap = 2 * ballRadius - dist;
+              let nx = dx / dist, ny = dy / dist;
+              a.x -= nx * overlap / 2;
+              a.y -= ny * overlap / 2;
+              b.x += nx * overlap / 2;
+              b.y += ny * overlap / 2;
+              // Relative velocity
+              let dvx = b.vx - a.vx, dvy = b.vy - a.vy;
+              let dot = dvx * nx + dvy * ny;
+              if (dot < 0) {
+                // Elastic collision
+                let m1 = 1, m2 = 1;
+                let impulse = (2 * dot) / (m1 + m2);
+                a.vx += impulse * nx * m2;
+                a.vy += impulse * ny * m2;
+                b.vx -= impulse * nx * m1;
+                b.vy -= impulse * ny * m1;
+              }
+            }
           }
         }
       }
@@ -133,37 +262,39 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // Draw ground
         ctx.fillStyle = "#c5e1a5";
-        ctx.fillRect(0, y0 + 20, canvas.width, canvas.height - y0 - 20);
+        ctx.fillRect(0, y0 + ballRadius, canvas.width, canvas.height - y0 - ballRadius);
         // Draw wall
         ctx.fillStyle = "#bdbdbd";
-        ctx.fillRect(wallX, 0, 10, y0 + 20);
+        ctx.fillRect(wallX, 0, 10, y0 + ballRadius);
 
         // Draw all projectiles
         projectiles.forEach((p) => {
           // Draw trail
           p.trail.forEach((pos, i) => {
             ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 6 * (i/p.trail.length), 0, 2 * Math.PI);
-            ctx.fillStyle = `rgba(255,112,67,${0.2 + (i/p.trail.length)*0.5})`;
+            ctx.arc(pos.x, pos.y, ballRadius * (i/p.trail.length), 0, 2 * Math.PI);
+            ctx.fillStyle = p.color + (i < p.trail.length-1 ? "55" : "");
             ctx.fill();
           });
           // Draw projectile
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 12, 0, 2 * Math.PI);
-          ctx.fillStyle = "#ff7043";
+          ctx.arc(p.x, p.y, ballRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = p.color;
           ctx.fill();
-          ctx.strokeStyle = "#d84315";
+          ctx.strokeStyle = "#333";
           ctx.stroke();
         });
       }
 
       function animate() {
         projectiles.forEach(updateProjectile);
+        handleCollisions();
         drawProjectile();
         requestAnimationFrame(animate);
       }
 
-      window.resetProjectile();
+      updateLabels();
+      resetProjectile();
       animate();
     });
   </script>

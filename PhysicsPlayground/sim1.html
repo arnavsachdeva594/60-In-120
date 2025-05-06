@@ -4,6 +4,93 @@
   <meta charset="UTF-8">
   <title>Pendulum Simulator | Physics Playground</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    .canvas-container {
+      background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
+      border-radius: 1.5rem;
+      box-shadow: 0 6px 32px rgba(63,81,181,0.10);
+      margin: 2rem auto 1rem auto;
+      padding: 2rem 1rem 1rem 1rem;
+      width: fit-content;
+      position: relative;
+      max-width: 95vw;
+    }
+    [data-theme="dark"] .canvas-container {
+      background: linear-gradient(135deg, #23243a 0%, #1e1e1e 100%);
+    }
+    .energy-display {
+      background: rgba(255,255,255,0.8);
+      color: #1a237e;
+      border-radius: 8px;
+      padding: 0.7rem 1.2rem;
+      box-shadow: 0 2px 8px rgba(63,81,181,0.10);
+      font-size: 1.1rem;
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10;
+      min-width: 120px;
+      text-align: left;
+    }
+    [data-theme="dark"] .energy-display {
+      background: rgba(30,30,40,0.85);
+      color: #e3f2fd;
+    }
+    .controls-card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem 2rem;
+      align-items: center;
+      justify-content: center;
+      margin: 1.5rem auto 2rem auto;
+      padding: 1.5rem 2rem;
+      max-width: 800px;
+    }
+    .controls-card label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .controls-card input[type="range"] {
+      accent-color: #7e57c2;
+      width: 100px;
+    }
+    .controls-card .value {
+      font-weight: bold;
+      color: #5e35b1;
+      min-width: 2.5em;
+      display: inline-block;
+      text-align: right;
+    }
+    [data-theme="dark"] .controls-card .value {
+      color: #b39ddb;
+    }
+    .reset-btn {
+      background: #ff7043;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px var(--shadow);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .reset-btn:hover { background: #d84315; }
+    @media (max-width: 700px) {
+      .controls-card { flex-direction: column; gap: 1rem; padding: 1rem; }
+      .canvas-container { padding: 1rem 0.5rem 0.5rem 0.5rem; }
+    }
+  </style>
 </head>
 <body>
   <div class="loader">
@@ -25,13 +112,25 @@
       <div class="energy-display" id="energyDisplay"></div>
       <canvas id="pendulumCanvas" width="400" height="350"></canvas>
     </div>
-    <div class="controls">
-      <label>Length: <input type="range" id="length" min="100" max="250" value="200"></label>
-      <label>Gravity: <input type="range" id="gravity" min="5" max="20" value="10"></label>
-      <label>Mass: <input type="range" id="mass" min="0.5" max="5" value="1" step="0.1"></label>
-      <label>Damping: <input type="range" id="damping" min="0.98" max="1" value="0.995" step="0.001"></label>
+    <div class="controls-card">
+      <label>Length
+        <input type="range" id="length" min="100" max="250" value="200">
+        <span class="value" id="lengthVal">200</span> px
+      </label>
+      <label>Gravity
+        <input type="range" id="gravity" min="5" max="20" value="10">
+        <span class="value" id="gravityVal">10</span> m/s²
+      </label>
+      <label>Mass
+        <input type="range" id="mass" min="0.5" max="5" value="1" step="0.1">
+        <span class="value" id="massVal">1.0</span> kg
+      </label>
+      <label>Damping
+        <input type="range" id="damping" min="0.98" max="1" value="0.995" step="0.001">
+        <span class="value" id="dampingVal">0.995</span>
+      </label>
       <span id="periodDisplay" style="margin-left:1.5rem;"></span>
-      <button onclick="resetPendulum()">Reset</button>
+      <button class="reset-btn" id="resetBtn" title="Reset"><i class="fas fa-rotate-right"></i></button>
     </div>
     <a href="index.html">← Back to Home</a>
   </main>
@@ -68,26 +167,40 @@
       let isDragging = false;
       let trail = [];
 
-      document.getElementById('length').addEventListener('input', function() {
-        length = parseInt(this.value);
-        updatePeriod();
-      });
-      document.getElementById('gravity').addEventListener('input', function() {
-        gravity = parseFloat(this.value);
-        updatePeriod();
-      });
-      document.getElementById('mass').addEventListener('input', function() {
-        mass = parseFloat(this.value);
-      });
-      document.getElementById('damping').addEventListener('input', function() {
-        damping = parseFloat(this.value);
-      });
-
       function updatePeriod() {
-        // Period for small angles
         let T = 2 * Math.PI * Math.sqrt(length / gravity);
         document.getElementById('periodDisplay').textContent = `Period: ${T.toFixed(2)} s`;
       }
+
+      function updateLabels() {
+        document.getElementById('lengthVal').textContent = length;
+        document.getElementById('gravityVal').textContent = gravity;
+        document.getElementById('massVal').textContent = mass.toFixed(1);
+        document.getElementById('dampingVal').textContent = damping.toFixed(3);
+      }
+
+      document.getElementById('length').addEventListener('input', function() {
+        length = parseInt(this.value);
+        updatePeriod(); updateLabels();
+      });
+      document.getElementById('gravity').addEventListener('input', function() {
+        gravity = parseFloat(this.value);
+        updatePeriod(); updateLabels();
+      });
+      document.getElementById('mass').addEventListener('input', function() {
+        mass = parseFloat(this.value);
+        updateLabels();
+      });
+      document.getElementById('damping').addEventListener('input', function() {
+        damping = parseFloat(this.value);
+        updateLabels();
+      });
+
+      document.getElementById('resetBtn').onclick = function() {
+        angle = Math.PI / 4;
+        angleVel = 0;
+        trail = [];
+      };
 
       function drawPendulum() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -143,9 +256,9 @@
         const potential = mass * gravity * (length - length * Math.cos(angle));
         const kinetic = 0.5 * mass * (length * angleVel) ** 2;
         document.getElementById('energyDisplay').innerHTML = `
-          PE: ${potential.toFixed(1)} J<br>
-          KE: ${kinetic.toFixed(1)} J<br>
-          Total: ${(potential + kinetic).toFixed(1)} J
+          <b>PE:</b> ${potential.toFixed(1)} J<br>
+          <b>KE:</b> ${kinetic.toFixed(1)} J<br>
+          <b>Total:</b> ${(potential + kinetic).toFixed(1)} J
         `;
       }
 
@@ -153,7 +266,7 @@
         if (!isDragging) {
           angleAcc = (-gravity / length) * Math.sin(angle);
           angleVel += angleAcc;
-          angleVel *= damping; // damping
+          angleVel *= damping;
           angle += angleVel;
         }
       }
@@ -163,12 +276,6 @@
         drawPendulum();
         requestAnimationFrame(animate);
       }
-
-      window.resetPendulum = function() {
-        angle = Math.PI / 4;
-        angleVel = 0;
-        trail = [];
-      };
 
       // Drag to set angle
       canvas.addEventListener('mousedown', startDrag);
@@ -206,6 +313,7 @@
       }
 
       updatePeriod();
+      updateLabels();
       animate();
     });
   </script>
