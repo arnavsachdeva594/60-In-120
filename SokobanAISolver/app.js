@@ -1,47 +1,72 @@
-// Set up the initial game state
+// Set up the initial game state and canvas
 const gameBoard = document.getElementById('gameBoard');
 const ctx = gameBoard.getContext('2d');
 
-// Placeholder for the initial Sokoban board state (a simple 5x5 example)
-let board = [
-  ['#', '#', '#', '#', '#'],
-  ['#', '.', '.', '.', '#'],
-  ['#', '.', 'P', '.', '#'],
-  ['#', '.', 'B', '.', '#'],
-  ['#', '#', '#', '#', '#']
-];
+// Game dimensions and tile size
+const tileSize = 80;
+const boardWidth = 5;
+const boardHeight = 5;
 
-// Draw the initial board on the canvas
+// Placeholder board and game state
+let board = [];
+
+// Draw the game board based on the current state
 function drawBoard() {
-  const tileSize = 80;
-  for (let row = 0; row < board.length; row++) {
-    for (let col = 0; col < board[row].length; col++) {
+  ctx.clearRect(0, 0, gameBoard.width, gameBoard.height); // Clear canvas
+
+  for (let row = 0; row < boardHeight; row++) {
+    for (let col = 0; col < boardWidth; col++) {
       const x = col * tileSize;
       const y = row * tileSize;
       const tile = board[row][col];
       
       if (tile === '#') {
-        ctx.fillStyle = '#333';  // Wall
+        ctx.fillStyle = '#333'; // Wall
         ctx.fillRect(x, y, tileSize, tileSize);
       } else if (tile === '.') {
-        ctx.fillStyle = '#fff';  // Empty space
+        ctx.fillStyle = '#fff'; // Empty space
         ctx.fillRect(x, y, tileSize, tileSize);
       } else if (tile === 'P') {
-        ctx.fillStyle = '#0f0';  // Player
+        ctx.fillStyle = '#0f0'; // Player
         ctx.fillRect(x, y, tileSize, tileSize);
       } else if (tile === 'B') {
-        ctx.fillStyle = '#00f';  // Box
+        ctx.fillStyle = '#00f'; // Box
         ctx.fillRect(x, y, tileSize, tileSize);
       }
-      ctx.strokeRect(x, y, tileSize, tileSize);
+      ctx.strokeRect(x, y, tileSize, tileSize); // Outline each tile
     }
   }
 }
 
+// Generate a random Sokoban level
+function generateLevel() {
+  // Simple generation algorithm: Create walls, player, box, and goal
+  let newBoard = Array.from({ length: boardHeight }, () => Array(boardWidth).fill('.'));
+
+  // Place walls around the edges
+  for (let i = 0; i < boardHeight; i++) {
+    for (let j = 0; j < boardWidth; j++) {
+      if (i === 0 || i === boardHeight - 1 || j === 0 || j === boardWidth - 1) {
+        newBoard[i][j] = '#';
+      }
+    }
+  }
+
+  // Randomly place player ('P') and box ('B')
+  newBoard[2][2] = 'P'; // Player starting position
+  newBoard[3][2] = 'B'; // Box starting position
+
+  // Set the board state
+  board = newBoard;
+  drawBoard();
+  document.getElementById('solveButton').disabled = false; // Enable solve button after generating a level
+}
+
 // Handle the "Solve" button click
 document.getElementById('solveButton').addEventListener('click', solveGame);
+document.getElementById('generateButton').addEventListener('click', generateLevel);
 
-// Function to simulate a game-solving algorithm (BFS in this case)
+// Function to simulate solving the game (currently a dummy BFS)
 function solveGame() {
   const solutionSteps = bfsSolve(); // Get the steps to solve the puzzle
   let currentStep = 0;
@@ -53,13 +78,13 @@ function solveGame() {
       clearInterval(interval);
       console.log('Game Solved');
     }
-  }, 500);  // Adjust step delay for visualization speed
+  }, 500); // Adjust step delay for visualization speed
 }
 
-// Basic BFS algorithm to simulate solving
+// Dummy BFS solver
 function bfsSolve() {
   // Dummy solution: move the player to the box and push it
-  // In a real case, implement your BFS algorithm here
+  // This would be replaced with a proper algorithm (BFS, A*, etc.)
 
   return [
     { player: { row: 2, col: 2 }, box: { row: 3, col: 2 } },  // Initial state
@@ -80,5 +105,5 @@ function applyMove(move) {
   drawBoard();
 }
 
-// Initial draw
+// Initial draw (empty level)
 drawBoard();
