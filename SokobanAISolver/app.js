@@ -1,121 +1,84 @@
-// Get DOM Elements
-const generateBtn = document.getElementById('generateBtn');
-const solveBtn = document.getElementById('solveBtn');
-const levelDisplay = document.getElementById('levelDisplay');
-const solverSteps = document.getElementById('solverSteps');
+// Set up the initial game state
+const gameBoard = document.getElementById('gameBoard');
+const ctx = gameBoard.getContext('2d');
 
-let currentLevel = null;
-let solutionSteps = [];
-let currentStep = 0;
+// Placeholder for the initial Sokoban board state (a simple 5x5 example)
+let board = [
+  ['#', '#', '#', '#', '#'],
+  ['#', '.', '.', '.', '#'],
+  ['#', '.', 'P', '.', '#'],
+  ['#', '.', 'B', '.', '#'],
+  ['#', '#', '#', '#', '#']
+];
 
-// Generate a new level when the button is clicked
-generateBtn.addEventListener('click', () => {
-    currentLevel = generateLevel();
-    solutionSteps = [];
-    currentStep = 0;
-    updateLevelDisplay(currentLevel);
-    solveBtn.disabled = false;
-    solverSteps.innerHTML = '';
-});
-
-// Display the level in the DOM with smooth transitions
-function updateLevelDisplay(level) {
-    levelDisplay.innerHTML = '';
-    level.map.forEach((row, y) => {
-        row.split('').forEach((cell, x) => {
-            const div = document.createElement('div');
-            div.classList.add('empty');
-            if (cell === '#') div.classList.add('wall');
-            if (cell === '@') div.classList.add('player');
-            if (cell === '$') div.classList.add('box');
-            if (cell === '.') div.classList.add('goal');
-            div.setAttribute('data-x', x);
-            div.setAttribute('data-y', y);
-            levelDisplay.appendChild(div);
-        });
-    });
+// Draw the initial board on the canvas
+function drawBoard() {
+  const tileSize = 80;
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      const x = col * tileSize;
+      const y = row * tileSize;
+      const tile = board[row][col];
+      
+      if (tile === '#') {
+        ctx.fillStyle = '#333';  // Wall
+        ctx.fillRect(x, y, tileSize, tileSize);
+      } else if (tile === '.') {
+        ctx.fillStyle = '#fff';  // Empty space
+        ctx.fillRect(x, y, tileSize, tileSize);
+      } else if (tile === 'P') {
+        ctx.fillStyle = '#0f0';  // Player
+        ctx.fillRect(x, y, tileSize, tileSize);
+      } else if (tile === 'B') {
+        ctx.fillStyle = '#00f';  // Box
+        ctx.fillRect(x, y, tileSize, tileSize);
+      }
+      ctx.strokeRect(x, y, tileSize, tileSize);
+    }
+  }
 }
 
-// Solve the Sokoban level when the button is clicked
-solveBtn.addEventListener('click', () => {
-    if (currentLevel) {
-        solutionSteps = solveSokoban(currentLevel);
-        currentStep = 0;
-        displaySolverSteps();
-    }
-});
+// Handle the "Solve" button click
+document.getElementById('solveButton').addEventListener('click', solveGame);
 
-// Display solver steps with animation
-function displaySolverSteps() {
+// Function to simulate a game-solving algorithm (BFS in this case)
+function solveGame() {
+  const solutionSteps = bfsSolve(); // Get the steps to solve the puzzle
+  let currentStep = 0;
+  let interval = setInterval(() => {
     if (currentStep < solutionSteps.length) {
-        const step = solutionSteps[currentStep];
-        solverSteps.innerHTML = `Step ${currentStep + 1}: ${step.type}`;
-        animateSolverStep(step);
-        currentStep++;
-        setTimeout(displaySolverSteps, 1000);
+      applyMove(solutionSteps[currentStep]);
+      currentStep++;
+    } else {
+      clearInterval(interval);
+      console.log('Game Solved');
     }
+  }, 500);  // Adjust step delay for visualization speed
 }
 
-// Animate the player and box movements
-function animateSolverStep(step) {
-    const { fromPos, toPos, type } = step;
-    const playerDiv = document.querySelector(`div[data-x='${fromPos.x}'][data-y='${fromPos.y}']`);
-    const toDiv = document.querySelector(`div[data-x='${toPos.x}'][data-y='${toPos.y}']`);
+// Basic BFS algorithm to simulate solving
+function bfsSolve() {
+  // Dummy solution: move the player to the box and push it
+  // In a real case, implement your BFS algorithm here
 
-    if (type === 'movePlayer') {
-        playerDiv.classList.remove('player');
-        playerDiv.classList.add('empty');
-        toDiv.classList.remove('empty');
-        toDiv.classList.add('player');
-    } else if (type === 'moveBox') {
-        const boxDiv = document.querySelector(`div[data-x='${fromPos.x}'][data-y='${fromPos.y}']`);
-        boxDiv.classList.remove('box');
-        boxDiv.classList.add('empty');
-        toDiv.classList.remove('empty');
-        toDiv.classList.add('box');
-    }
+  return [
+    { player: { row: 2, col: 2 }, box: { row: 3, col: 2 } },  // Initial state
+    { player: { row: 2, col: 3 }, box: { row: 3, col: 2 } },
+    { player: { row: 3, col: 3 }, box: { row: 3, col: 3 } },  // Final solved state
+  ];
 }
 
-// Sokoban solver function (unchanged)
-function solveSokoban(level) {
-    const { map, player, boxes, goals } = level;
-    const visited = new Set();
-    const queue = [{ player, boxes, moves: [] }];
-    
-    const directions = [
-        { x: 0, y: 1 },
-        { x: 0, y: -1 },
-        { x: 1, y: 0 },
-        { x: -1, y: 0 }
-    ];
+// Apply each move and update the game board
+function applyMove(move) {
+  // Update player position
+  board[move.player.row][move.player.col] = 'P';
 
-    while (queue.length > 0) {
-        const { player: currPlayer, boxes: currBoxes, moves } = queue.shift();
+  // Update box position
+  board[move.box.row][move.box.col] = 'B';
 
-        if (goalReached(currBoxes, goals)) return moves;
-
-        directions.forEach(dir => {
-            const newPlayer = { x: currPlayer.x + dir.x, y: currPlayer.y + dir.y };
-
-            if (isValidMove(map, newPlayer, currBoxes, visited)) {
-                const newBoxes = [...currBoxes];
-                const newMoves = [...moves, { type: 'movePlayer', fromPos: currPlayer, toPos: newPlayer }];
-                
-                queue.push({ player: newPlayer, boxes: newBoxes, moves: newMoves });
-                visited.add(`${newPlayer.x}-${newPlayer.y}`);
-            }
-        });
-    }
-
-    return [];
+  // Redraw the updated game board
+  drawBoard();
 }
 
-function isValidMove(map, player, boxes, visited) {
-    const isWall = map[player.y][player.x] === '#';
-    const isBox = boxes.some(box => box.x === player.x && box.y === player.y);
-    return !isWall && !isBox && !visited.has(`${player.x}-${player.y}`);
-}
-
-function goalReached(boxes, goals) {
-    return boxes.every(box => goals.some(goal => goal.x === box.x && goal.y === box.y));
-}
+// Initial draw
+drawBoard();
