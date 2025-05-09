@@ -27,31 +27,6 @@ NumPy
 
 SciPy
 
-Install dependencies:
-
-bash
-Copy
-Edit
-pip install numpy scipy
-📦 Usage
-Clone or download this repository.
-
-Navigate to the project folder.
-
-Run the main program:
-
-bash
-Copy
-Edit
-python main.py
-Follow the prompts:
-
-scss
-Copy
-Edit
-Enter grid width (5–10):
-Enter grid height (5–10):
-Enter number of boxes/goals (auto-limited by grid size):
 The program will:
 
 ✅ Generate random levels until it finds a solvable puzzle
