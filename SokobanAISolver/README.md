@@ -59,35 +59,6 @@ The program will:
 ✅ Solve the puzzle and show the solution
 ✅ Animate the solution step-by-step in the console
 
-🎮 Example Run
-python
-Copy
-Edit
-Sokoban AI Solver (Generate-Until-Solvable)
-
-Enter grid width (min 5, max 10): 7
-Enter grid height (min 5, max 10): 7
-Enter number of boxes/goals (min 1, max 6): 2
-
-Solvable level found after 3 attempt(s) in 0.14 seconds.
-
-Generated Solvable Level:
-
-#######
-#.$@$.#
-#######
-
-Initial State:
-
-#######
-#.$@$.#
-#######
-
-Solution found in 4 moves:
-Right -> Down -> Left -> Up
-
-Animating solution:
-...
 ⚠️ Notes
 For larger grids or more boxes, generation and solving may take longer.
 
