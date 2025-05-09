@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "fastpriorityqueue": "^0.7.5",
-    "framer-motion": "^12.10.4",
-    "lucide-react": "^0.508.0"
-  }
-}

@@ -1,0 +1,136 @@
+/* General Reset and Body Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #4e91d1, #2b72b9);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+header {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Button Styles */
+button {
+    padding: 15px 25px;
+    font-size: 18px;
+    margin: 10px;
+    border: none;
+    border-radius: 50px;
+    background: #ff6f61;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background-color: #ff4c39;
+    transform: scale(1.05);
+}
+
+/* Disabled Button */
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Glassmorphism Background and Animation */
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.level-display {
+    display: grid;
+    grid-template-columns: repeat(8, 50px);
+    grid-gap: 5px;
+    margin-top: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.level-display div {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.level-display .wall {
+    background-color: #333;
+    border-radius: 8px;
+}
+
+.level-display .player {
+    background-color: #ff6f61;
+    border-radius: 50%;
+}
+
+.level-display .box {
+    background-color: #4e91d1;
+    border-radius: 8px;
+}
+
+.level-display .goal {
+    background-color: #d4e157;
+    border-radius: 8px;
+}
+
+.level-display .empty {
+    background-color: #f4f4f4;
+}
+
+/* Solver Steps Styling */
+.solver-steps {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .level-display {
+        grid-template-columns: repeat(6, 50px);
+    }
+}
+
+@media (max-width: 480px) {
+    .level-display {
+        grid-template-columns: repeat(4, 50px);
+    }
+    button {
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+}
