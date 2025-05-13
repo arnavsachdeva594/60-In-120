@@ -2,11 +2,28 @@ const ROWS = 6;
 const COLS = 7;
 const PLAYER = 'red';
 const AI = 'yellow';
+
 let board = [];
 let gameOver = false;
+let currentPlayer = PLAYER;
+let vsAI = true;
 
 const gameDiv = document.getElementById('game');
 const statusDiv = document.getElementById('status');
+const modeSelect = document.getElementById('modeSelect');
+const restartBtn = document.getElementById('restartBtn');
+const toggleTheme = document.getElementById('toggleTheme');
+
+modeSelect.addEventListener('change', () => {
+  vsAI = modeSelect.value === 'ai';
+  initBoard();
+});
+
+restartBtn.addEventListener('click', initBoard);
+
+toggleTheme.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+});
 
 function initBoard() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -21,8 +38,9 @@ function initBoard() {
       gameDiv.appendChild(cell);
     }
   }
-  statusDiv.textContent = "Your turn!";
+  currentPlayer = PLAYER;
   gameOver = false;
+  statusDiv.textContent = "Your turn!";
 }
 
 function handleClick(e) {
@@ -31,11 +49,11 @@ function handleClick(e) {
   const row = getAvailableRow(col);
   if (row === null) return;
 
-  placePiece(row, col, PLAYER);
-  updateCell(row, col, PLAYER);
+  placePiece(row, col, currentPlayer);
+  updateCell(row, col, currentPlayer);
 
-  if (checkWin(board, PLAYER)) {
-    statusDiv.textContent = "You win!";
+  if (checkWin(board, currentPlayer)) {
+    statusDiv.textContent = `${currentPlayer === 'red' ? 'Red' : 'Yellow'} wins!`;
     gameOver = true;
     return;
   }
@@ -46,41 +64,41 @@ function handleClick(e) {
     return;
   }
 
-  statusDiv.textContent = "AI is thinking...";
-  setTimeout(() => {
-    const aiMove = getBestMove(board, 4, -Infinity, Infinity, true);
-    if (aiMove && aiMove.col !== undefined) {
-      const aiRow = getAvailableRow(aiMove.col);
-      placePiece(aiRow, aiMove.col, AI);
-      updateCell(aiRow, aiMove.col, AI);
+  if (vsAI && currentPlayer === PLAYER) {
+    currentPlayer = AI;
+    statusDiv.textContent = "AI is thinking...";
+    setTimeout(() => {
+      const aiMove = getBestMove(board, 4, -Infinity, Infinity, true);
+      if (aiMove && aiMove.col !== undefined) {
+        const aiRow = getAvailableRow(aiMove.col);
+        placePiece(aiRow, aiMove.col, AI);
+        updateCell(aiRow, aiMove.col, AI);
 
-      if (checkWin(board, AI)) {
-        statusDiv.textContent = "AI wins!";
-        gameOver = true;
-        return;
+        if (checkWin(board, AI)) {
+          statusDiv.textContent = "AI wins!";
+          gameOver = true;
+          return;
+        }
+
+        if (isBoardFull()) {
+          statusDiv.textContent = "It's a draw!";
+          gameOver = true;
+          return;
+        }
+
+        currentPlayer = PLAYER;
+        statusDiv.textContent = "Your turn!";
       }
-
-      if (isBoardFull()) {
-        statusDiv.textContent = "It's a draw!";
-        gameOver = true;
-        return;
-      }
-
-      statusDiv.textContent = "Your turn!";
-    }
-  }, 500);
+    }, 500);
+  } else if (!vsAI) {
+    currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+    statusDiv.textContent = `${currentPlayer === 'red' ? 'Red' : 'Yellow'}'s turn`;
+  }
 }
 
 function getAvailableRow(col) {
   for (let r = ROWS - 1; r >= 0; r--) {
     if (!board[r][col]) return r;
-  }
-  return null;
-}
-
-function getAvailableRowInBoard(bd, col) {
-  for (let r = ROWS - 1; r >= 0; r--) {
-    if (!bd[r][col]) return r;
   }
   return null;
 }
@@ -179,6 +197,13 @@ function scorePosition(bd, player) {
 
 function isTerminalNode(bd) {
   return checkWin(bd, PLAYER) || checkWin(bd, AI) || getValidLocations(bd).length === 0;
+}
+
+function getAvailableRowInBoard(bd, col) {
+  for (let r = ROWS - 1; r >= 0; r--) {
+    if (!bd[r][col]) return r;
+  }
+  return null;
 }
 
 function getBestMove(bd, depth, alpha, beta, maximizingPlayer) {

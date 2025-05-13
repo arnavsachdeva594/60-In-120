@@ -3,13 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connect Four AI</title>
+  <title>Connect Four</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Connect Four</h1>
-  <div id="game"></div>
-  <p id="status"></p>
+  <div class="top-bar">
+    <h1>Connect Four</h1>
+    <div class="controls">
+      <select id="modeSelect">
+        <option value="pvp">Player vs Player</option>
+        <option value="ai" selected>Player vs AI</option>
+      </select>
+      <button id="toggleTheme">🌙</button>
+      <button id="restartBtn">🔁 Restart</button>
+    </div>
+  </div>
+
+  <div id="status">Your turn!</div>
+  <div id="game" class="board"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
