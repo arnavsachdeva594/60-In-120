@@ -6,7 +6,7 @@ const AI = 'yellow';
 let board = [];
 let gameOver = false;
 let currentPlayer = PLAYER;
-let vsAI = true;
+let vsAI = true; // Default is Player vs AI
 
 const gameDiv = document.getElementById('game');
 const statusDiv = document.getElementById('status');
@@ -14,9 +14,10 @@ const modeSelect = document.getElementById('modeSelect');
 const restartBtn = document.getElementById('restartBtn');
 const toggleTheme = document.getElementById('toggleTheme');
 
+// Event listeners
 modeSelect.addEventListener('change', () => {
   vsAI = modeSelect.value === 'ai';
-  initBoard();
+  initBoard(); // Restart the game when mode changes
 });
 
 restartBtn.addEventListener('click', initBoard);
@@ -27,6 +28,11 @@ toggleTheme.addEventListener('click', () => {
 
 function initBoard() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  gameOver = false;
+  currentPlayer = PLAYER; // Start with Player's turn
+  statusDiv.textContent = "Your turn!";
+  
+  // Create game board UI
   gameDiv.innerHTML = '';
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
@@ -38,17 +44,15 @@ function initBoard() {
       gameDiv.appendChild(cell);
     }
   }
-  currentPlayer = PLAYER;
-  gameOver = false;
-  statusDiv.textContent = "Your turn!";
 }
 
 function handleClick(e) {
   if (gameOver) return;
+  
   const col = parseInt(e.target.dataset.col);
   const row = getAvailableRow(col);
-  if (row === null) return;
-
+  if (row === null) return; // Column is full
+  
   placePiece(row, col, currentPlayer);
   updateCell(row, col, currentPlayer);
 
@@ -64,6 +68,7 @@ function handleClick(e) {
     return;
   }
 
+  // If AI mode is enabled and it is the AI's turn
   if (vsAI && currentPlayer === PLAYER) {
     currentPlayer = AI;
     statusDiv.textContent = "AI is thinking...";
@@ -86,12 +91,12 @@ function handleClick(e) {
           return;
         }
 
-        currentPlayer = PLAYER;
+        currentPlayer = PLAYER; // Switch back to player
         statusDiv.textContent = "Your turn!";
       }
-    }, 500);
+    }, 500); // Artificial delay for AI move
   } else if (!vsAI) {
-    currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+    currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red'; // Player vs Player logic
     statusDiv.textContent = `${currentPlayer === 'red' ? 'Red' : 'Yellow'}'s turn`;
   }
 }
@@ -119,30 +124,35 @@ function isBoardFull() {
 }
 
 function checkWin(bd, player) {
+  // Check horizontal, vertical, and diagonal directions
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      if (bd[r][c] === player && bd[r][c+1] === player && bd[r][c+2] === player && bd[r][c+3] === player)
+      if (bd[r][c] === player && bd[r][c + 1] === player && bd[r][c + 2] === player && bd[r][c + 3] === player)
         return true;
     }
   }
+
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r <= ROWS - 4; r++) {
-      if (bd[r][c] === player && bd[r+1][c] === player && bd[r+2][c] === player && bd[r+3][c] === player)
+      if (bd[r][c] === player && bd[r + 1][c] === player && bd[r + 2][c] === player && bd[r + 3][c] === player)
         return true;
     }
   }
+
   for (let r = 3; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      if (bd[r][c] === player && bd[r-1][c+1] === player && bd[r-2][c+2] === player && bd[r-3][c+3] === player)
+      if (bd[r][c] === player && bd[r - 1][c + 1] === player && bd[r - 2][c + 2] === player && bd[r - 3][c + 3] === player)
         return true;
     }
   }
+
   for (let r = 0; r <= ROWS - 4; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      if (bd[r][c] === player && bd[r+1][c+1] === player && bd[r+2][c+2] === player && bd[r+3][c+3] === player)
+      if (bd[r][c] === player && bd[r + 1][c + 1] === player && bd[r + 2][c + 2] === player && bd[r + 3][c + 3] === player)
         return true;
     }
   }
+
   return false;
 }
 
@@ -168,6 +178,8 @@ function scorePosition(bd, player) {
     if (count === 2 && empty === 2) return 2;
     return 0;
   }
+
+  // Check horizontal, vertical, and diagonal scoring
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
       const window = bd[r].slice(c, c + 4);
@@ -176,19 +188,19 @@ function scorePosition(bd, player) {
   }
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r <= ROWS - 4; r++) {
-      const window = [bd[r][c], bd[r+1][c], bd[r+2][c], bd[r+3][c]];
+      const window = [bd[r][c], bd[r + 1][c], bd[r + 2][c], bd[r + 3][c]];
       score += countSequence(window);
     }
   }
   for (let r = 3; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      const window = [bd[r][c], bd[r-1][c+1], bd[r-2][c+2], bd[r-3][c+3]];
+      const window = [bd[r][c], bd[r - 1][c + 1], bd[r - 2][c + 2], bd[r - 3][c + 3]];
       score += countSequence(window);
     }
   }
   for (let r = 0; r <= ROWS - 4; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
-      const window = [bd[r][c], bd[r+1][c+1], bd[r+2][c+2], bd[r+3][c+3]];
+      const window = [bd[r][c], bd[r + 1][c + 1], bd[r + 2][c + 2], bd[r + 3][c + 3]];
       score += countSequence(window);
     }
   }
@@ -210,51 +222,29 @@ function getBestMove(bd, depth, alpha, beta, maximizingPlayer) {
   const validLocations = getValidLocations(bd);
   const isTerminal = isTerminalNode(bd);
   if (depth === 0 || isTerminal) {
-    if (isTerminal) {
-      if (checkWin(bd, AI)) return { score: 1000000 };
-      else if (checkWin(bd, PLAYER)) return { score: -1000000 };
-      else return { score: 0 };
-    }
-    return { score: scorePosition(bd, AI) };
+    return { score: scorePosition(bd, PLAYER) };
   }
 
-  if (maximizingPlayer) {
-    let value = -Infinity;
-    let column = validLocations[Math.floor(Math.random() * validLocations.length)];
-    for (const col of validLocations) {
-      const row = getAvailableRowInBoard(bd, col);
-      if (row !== null) {
-        const tempBoard = copyBoard(bd);
-        tempBoard[row][col] = AI;
-        const newScore = getBestMove(tempBoard, depth - 1, alpha, beta, false).score;
-        if (newScore > value) {
-          value = newScore;
-          column = col;
-        }
-        alpha = Math.max(alpha, value);
-        if (alpha >= beta) break;
-      }
+  let bestMove = { score: maximizingPlayer ? -Infinity : Infinity };
+
+  validLocations.forEach(col => {
+    const row = getAvailableRowInBoard(bd, col);
+    const newBd = copyBoard(bd);
+    newBd[row][col] = maximizingPlayer ? AI : PLAYER;
+
+    const moveScore = getBestMove(newBd, depth - 1, alpha, beta, !maximizingPlayer).score;
+    bestMove = { col, score: moveScore };
+
+    if (maximizingPlayer) {
+      alpha = Math.max(alpha, bestMove.score);
+      if (beta <= alpha) return bestMove;
+    } else {
+      beta = Math.min(beta, bestMove.score);
+      if (beta <= alpha) return bestMove;
     }
-    return { col: column, score: value };
-  } else {
-    let value = Infinity;
-    let column = validLocations[Math.floor(Math.random() * validLocations.length)];
-    for (const col of validLocations) {
-      const row = getAvailableRowInBoard(bd, col);
-      if (row !== null) {
-        const tempBoard = copyBoard(bd);
-        tempBoard[row][col] = PLAYER;
-        const newScore = getBestMove(tempBoard, depth - 1, alpha, beta, true).score;
-        if (newScore < value) {
-          value = newScore;
-          column = col;
-        }
-        beta = Math.min(beta, value);
-        if (alpha >= beta) break;
-      }
-    }
-    return { col: column, score: value };
-  }
+  });
+
+  return bestMove;
 }
 
-window.onload = initBoard;
+initBoard(); // Initialize the game board initially
