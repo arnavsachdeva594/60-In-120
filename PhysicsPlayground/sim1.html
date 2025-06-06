@@ -136,11 +136,9 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Loader
       window.addEventListener('load', () => {
         document.querySelector('.loader').classList.add('hidden');
       });
-      // Theme toggle
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.body.setAttribute('data-theme', savedTheme);
       document.getElementById('themeIcon').textContent =
@@ -152,7 +150,6 @@
         document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
       };
 
-      // Pendulum simulation
       const canvas = document.getElementById('pendulumCanvas');
       const ctx = canvas.getContext('2d');
       let length = 200;
@@ -207,7 +204,6 @@
   let bobX = origin.x + length * Math.sin(angle);
   let bobY = origin.y + length * Math.cos(angle);
 
-  // Draw angle arc (protractor) -- always from vertical, not from current angle
   ctx.beginPath();
   let startAngle = Math.PI / 2;
   let endAngle = Math.PI / 2 + angle;
@@ -217,16 +213,14 @@
   ctx.stroke();
   ctx.lineWidth = 1;
 
-  // Draw angle text (always at fixed position)
   ctx.save();
   ctx.translate(origin.x, origin.y);
-  ctx.rotate(0); // always at right of vertical
+  ctx.rotate(0); 
   ctx.font = "16px Arial";
   ctx.fillStyle = "#fbc02d";
   ctx.fillText((angle * 180 / Math.PI).toFixed(1) + "°", 45, -10);
   ctx.restore();
 
-  // Draw trail
   trail.forEach((pos, index) => {
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, bobRadius * (index/trail.length), 0, 2 * Math.PI);
@@ -234,7 +228,6 @@
     ctx.fill();
   });
 
-  // Draw rod
   ctx.beginPath();
   ctx.moveTo(origin.x, origin.y);
   ctx.lineTo(bobX, bobY);
@@ -242,7 +235,6 @@
   ctx.strokeStyle = "#3949ab";
   ctx.stroke();
 
-  // Draw bob
   ctx.beginPath();
   ctx.arc(bobX, bobY, bobRadius, 0, 2 * Math.PI);
   ctx.fillStyle = "#7e57c2";
@@ -250,11 +242,9 @@
   ctx.strokeStyle = "#5e35b1";
   ctx.stroke();
 
-  // Update trail
   trail.push({x: bobX, y: bobY});
   if (trail.length > 30) trail.shift();
 
-  // Energy display
   const potential = mass * gravity * (length - length * Math.cos(angle));
   const kinetic = 0.5 * mass * (length * angleVel) ** 2;
   document.getElementById('energyDisplay').innerHTML = `
@@ -279,7 +269,6 @@
         requestAnimationFrame(animate);
       }
 
-      // Drag to set angle
       canvas.addEventListener('mousedown', startDrag);
       canvas.addEventListener('mousemove', drag);
       canvas.addEventListener('mouseup', endDrag);

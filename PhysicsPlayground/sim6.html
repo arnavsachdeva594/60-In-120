@@ -31,12 +31,10 @@
     <a href="index.html">← Back to Home</a>
   </main>
   <script>
-    // Loader
     window.addEventListener('load', () => {
       document.querySelector('.loader').classList.add('hidden');
     });
 
-    // Theme management
     function toggleTheme() {
       document.body.setAttribute('data-theme',
         document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
@@ -45,13 +43,11 @@
       document.getElementById('themeIcon').textContent =
         document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
     }
-    // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
     document.getElementById('themeIcon').textContent =
       savedTheme === 'dark' ? '☀️' : '🌙';
 
-    // Wave interference
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
     let wavelength = 40;
@@ -68,7 +64,6 @@
 
     function drawWaves() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw sources
       let src1 = {x: 120, y: 160 - srcDist/2};
       let src2 = {x: 120, y: 160 + srcDist/2};
       ctx.fillStyle = "#1976d2";
@@ -79,7 +74,6 @@
       ctx.fillStyle = "#222";
       ctx.fillText("S1", src1.x - 18, src1.y - 8);
       ctx.fillText("S2", src2.x - 18, src2.y - 8);
-      // Draw interference pattern (dots)
       for (let x = 180; x < 400; x += 6) {
         for (let y = 20; y < 300; y += 6) {
           let r1 = Math.hypot(x - src1.x, y - src1.y);

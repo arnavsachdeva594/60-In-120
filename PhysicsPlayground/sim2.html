@@ -112,11 +112,9 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Loader
       window.addEventListener('load', () => {
         document.querySelector('.loader').classList.add('hidden');
       });
-      // Theme toggle
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.body.setAttribute('data-theme', savedTheme);
       document.getElementById('themeIcon').textContent =
@@ -128,16 +126,15 @@
         document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
       };
 
-      // Projectile simulation with collision
       const canvas = document.getElementById('projCanvas');
       const ctx = canvas.getContext('2d');
-      let gravity = 30; // More realistic for this scale
+      let gravity = 30; 
       let angle = 45;
       let speed = 50;
       let airResistance = false;
       let x0 = 40, y0 = canvas.height - 40;
       let projectiles = [];
-      let restitution = 0.75; // bounciness
+      let restitution = 0.75; 
       let wallX = canvas.width - 20;
       const ballRadius = 14;
 
@@ -182,9 +179,9 @@
 
       function updateProjectile(p) {
         if (!p.alive) return;
-        let dt = 0.012; // smaller time step for realistic speed
+        let dt = 0.012; 
         if (airResistance) {
-          const drag = 0.002; // much less air resistance
+          const drag = 0.002; 
           p.vx *= (1 - drag);
           p.vy *= (1 - drag);
           p.vy += gravity * dt;
@@ -196,18 +193,16 @@
         p.trail.push({x: p.x, y: p.y});
         if (p.trail.length > 50) p.trail.shift();
 
-        // Collision with ground
         if (p.y >= y0 - ballRadius) {
           p.y = y0 - ballRadius;
           if (Math.abs(p.vy) > 1) {
             p.vy = -p.vy * restitution;
-            p.vx *= 0.98; // friction
+            p.vx *= 0.98; 
           } else {
             p.vy = 0;
             p.alive = false;
           }
         }
-        // Collision with right wall
         if (p.x >= wallX - ballRadius) {
           p.x = wallX - ballRadius;
           if (Math.abs(p.vx) > 1) {
@@ -218,14 +213,12 @@
             p.alive = false;
           }
         }
-        // Collision with left wall
         if (p.x <= ballRadius) {
           p.x = ballRadius;
           p.vx = -p.vx * restitution;
         }
       }
 
-      // Ball-to-ball collision detection and response (elastic)
       function handleCollisions() {
         for (let i = 0; i < projectiles.length; ++i) {
           for (let j = i + 1; j < projectiles.length; ++j) {
@@ -234,18 +227,15 @@
             let dx = b.x - a.x, dy = b.y - a.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
             if (dist < 2 * ballRadius && dist > 0) {
-              // Resolve overlap
               let overlap = 2 * ballRadius - dist;
               let nx = dx / dist, ny = dy / dist;
               a.x -= nx * overlap / 2;
               a.y -= ny * overlap / 2;
               b.x += nx * overlap / 2;
               b.y += ny * overlap / 2;
-              // Relative velocity
               let dvx = b.vx - a.vx, dvy = b.vy - a.vy;
               let dot = dvx * nx + dvy * ny;
               if (dot < 0) {
-                // Elastic collision
                 let m1 = 1, m2 = 1;
                 let impulse = (2 * dot) / (m1 + m2);
                 a.vx += impulse * nx * m2;
@@ -260,23 +250,18 @@
 
       function drawProjectile() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Draw ground
         ctx.fillStyle = "#c5e1a5";
         ctx.fillRect(0, y0 + ballRadius, canvas.width, canvas.height - y0 - ballRadius);
-        // Draw wall
         ctx.fillStyle = "#bdbdbd";
         ctx.fillRect(wallX, 0, 10, y0 + ballRadius);
 
-        // Draw all projectiles
         projectiles.forEach((p) => {
-          // Draw trail
           p.trail.forEach((pos, i) => {
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, ballRadius * (i/p.trail.length), 0, 2 * Math.PI);
             ctx.fillStyle = p.color + (i < p.trail.length-1 ? "55" : "");
             ctx.fill();
           });
-          // Draw projectile
           ctx.beginPath();
           ctx.arc(p.x, p.y, ballRadius, 0, 2 * Math.PI);
           ctx.fillStyle = p.color;

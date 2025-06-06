@@ -31,12 +31,10 @@
     <a href="index.html">← Back to Home</a>
   </main>
   <script>
-    // Loader
     window.addEventListener('load', () => {
       document.querySelector('.loader').classList.add('hidden');
     });
 
-    // Theme management
     function toggleTheme() {
       document.body.setAttribute('data-theme',
         document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
@@ -45,13 +43,11 @@
       document.getElementById('themeIcon').textContent =
         document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
     }
-    // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
     document.getElementById('themeIcon').textContent =
       savedTheme === 'dark' ? '☀️' : '🌙';
 
-    // Circuit simulation
     const canvas = document.getElementById('circuitCanvas');
     const ctx = canvas.getContext('2d');
     let voltage = 5;
@@ -68,20 +64,18 @@
 
     function drawCircuit() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Wires
       ctx.strokeStyle = "#222";
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(60, 110); ctx.lineTo(120, 110); // left wire
-      ctx.lineTo(120, 60); // up
-      ctx.lineTo(280, 60); // top wire
-      ctx.lineTo(280, 110); // down
-      ctx.lineTo(340, 110); // right wire
-      ctx.lineTo(340, 170); // down
-      ctx.lineTo(60, 170); // bottom wire
-      ctx.lineTo(60, 110); // up
+      ctx.moveTo(60, 110); ctx.lineTo(120, 110); 
+      ctx.lineTo(120, 60); 
+      ctx.lineTo(280, 60); 
+      ctx.lineTo(280, 110); 
+      ctx.lineTo(340, 110); 
+      ctx.lineTo(340, 170); 
+      ctx.lineTo(60, 170); 
+      ctx.lineTo(60, 110); 
       ctx.stroke();
-      // Battery
       ctx.strokeStyle = "#1976d2";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -98,14 +92,12 @@
       ctx.fillStyle = "#1976d2";
       ctx.fillText("+", 50, 125);
       ctx.fillText("-", 50, 160);
-      // Bulb
       ctx.beginPath();
       ctx.arc(200, 60, 18, 0, 2 * Math.PI);
       ctx.fillStyle = "#fffde7";
       ctx.fill();
       ctx.strokeStyle = "#fbc02d";
       ctx.stroke();
-      // Bulb filament (brightness = current)
       let current = voltage / resistance;
       let bright = Math.min(1, current / 2);
       ctx.strokeStyle = `rgba(251,192,45,${bright})`;
@@ -114,13 +106,11 @@
       ctx.moveTo(192, 60);
       ctx.lineTo(208, 60);
       ctx.stroke();
-      // Bulb base
       ctx.strokeStyle = "#888";
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(200, 78); ctx.lineTo(200, 90);
       ctx.stroke();
-      // Display current
       ctx.fillStyle = "#222";
       ctx.font = "16px Arial";
       ctx.fillText(`Current: ${current.toFixed(2)} A`, 150, 200);

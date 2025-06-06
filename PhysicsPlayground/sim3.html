@@ -32,12 +32,10 @@
     <a href="index.html">← Back to Home</a>
   </main>
   <script>
-    // Loader
     window.addEventListener('load', () => {
       document.querySelector('.loader').classList.add('hidden');
     });
 
-    // Theme management
     function toggleTheme() {
       document.body.setAttribute('data-theme',
         document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
@@ -46,18 +44,16 @@
       document.getElementById('themeIcon').textContent =
         document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
     }
-    // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
     document.getElementById('themeIcon').textContent =
       savedTheme === 'dark' ? '☀️' : '🌙';
 
-    // Spring simulation
     const canvas = document.getElementById('springCanvas');
     const ctx = canvas.getContext('2d');
     let mass = 3;
     let k = 20;
-    let x = 80; // displacement from equilibrium
+    let x = 80; 
     let v = 0;
     let a = 0;
     let originY = 80;
@@ -75,10 +71,8 @@
 
     function drawSpring() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw ceiling
       ctx.fillStyle = "#90caf9";
       ctx.fillRect(150, originY - 10, 100, 10);
-      // Draw spring (zigzag)
       ctx.strokeStyle = "#1976d2";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -90,7 +84,6 @@
       }
       ctx.lineTo(200, equilibriumY + x);
       ctx.stroke();
-      // Draw mass
       ctx.fillStyle = "#fbc02d";
       ctx.fillRect(175, equilibriumY + x, 50, 35);
       ctx.strokeStyle = "#f57c00";
@@ -98,11 +91,10 @@
     }
 
     function updateSpring() {
-      // F = -kx - mg (down is positive)
       let force = -k * x + mass * g;
       a = force / mass;
       v += a * 0.04;
-      v *= 0.99; // damping
+      v *= 0.99; 
       x += v * 0.04;
     }
 

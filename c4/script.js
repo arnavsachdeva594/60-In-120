@@ -6,7 +6,7 @@ const AI = 'yellow';
 let board = [];
 let gameOver = false;
 let currentPlayer = PLAYER;
-let vsAI = true; // Default is Player vs AI
+let vsAI = true; 
 
 const gameDiv = document.getElementById('game');
 const statusDiv = document.getElementById('status');
@@ -14,10 +14,9 @@ const modeSelect = document.getElementById('modeSelect');
 const restartBtn = document.getElementById('restartBtn');
 const toggleTheme = document.getElementById('toggleTheme');
 
-// Event listeners
 modeSelect.addEventListener('change', () => {
   vsAI = modeSelect.value === 'ai';
-  initBoard(); // Restart the game when mode changes
+  initBoard(); 
 });
 
 restartBtn.addEventListener('click', initBoard);
@@ -29,10 +28,9 @@ toggleTheme.addEventListener('click', () => {
 function initBoard() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
   gameOver = false;
-  currentPlayer = PLAYER; // Start with Player's turn
+  currentPlayer = PLAYER; 
   statusDiv.textContent = "Your turn!";
   
-  // Create game board UI
   gameDiv.innerHTML = '';
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
@@ -51,7 +49,7 @@ function handleClick(e) {
   
   const col = parseInt(e.target.dataset.col);
   const row = getAvailableRow(col);
-  if (row === null) return; // Column is full
+  if (row === null) return; 
   
   placePiece(row, col, currentPlayer);
   updateCell(row, col, currentPlayer);
@@ -68,7 +66,6 @@ function handleClick(e) {
     return;
   }
 
-  // If AI mode is enabled and it is the AI's turn
   if (vsAI && currentPlayer === PLAYER) {
     currentPlayer = AI;
     statusDiv.textContent = "AI is thinking...";
@@ -91,12 +88,12 @@ function handleClick(e) {
           return;
         }
 
-        currentPlayer = PLAYER; // Switch back to player
+        currentPlayer = PLAYER; 
         statusDiv.textContent = "Your turn!";
       }
-    }, 500); // Artificial delay for AI move
+    }, 500); 
   } else if (!vsAI) {
-    currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red'; // Player vs Player logic
+    currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red'; 
     statusDiv.textContent = `${currentPlayer === 'red' ? 'Red' : 'Yellow'}'s turn`;
   }
 }
@@ -124,7 +121,6 @@ function isBoardFull() {
 }
 
 function checkWin(bd, player) {
-  // Check horizontal, vertical, and diagonal directions
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
       if (bd[r][c] === player && bd[r][c + 1] === player && bd[r][c + 2] === player && bd[r][c + 3] === player)
@@ -179,7 +175,6 @@ function scorePosition(bd, player) {
     return 0;
   }
 
-  // Check horizontal, vertical, and diagonal scoring
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c <= COLS - 4; c++) {
       const window = bd[r].slice(c, c + 4);
@@ -247,4 +242,4 @@ function getBestMove(bd, depth, alpha, beta, maximizingPlayer) {
   return bestMove;
 }
 
-initBoard(); // Initialize the game board initially
+initBoard(); 

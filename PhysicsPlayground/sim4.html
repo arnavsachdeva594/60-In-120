@@ -31,12 +31,10 @@
     <a href="index.html">← Back to Home</a>
   </main>
   <script>
-    // Loader
     window.addEventListener('load', () => {
       document.querySelector('.loader').classList.add('hidden');
     });
 
-    // Theme management
     function toggleTheme() {
       document.body.setAttribute('data-theme',
         document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
@@ -45,13 +43,11 @@
       document.getElementById('themeIcon').textContent =
         document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
     }
-    // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
     document.getElementById('themeIcon').textContent =
       savedTheme === 'dark' ? '☀️' : '🌙';
 
-    // Optics simulation
     const canvas = document.getElementById('opticsCanvas');
     const ctx = canvas.getContext('2d');
     let objDist = 120;
@@ -70,13 +66,11 @@
 
     function drawOptics() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Principal axis
       ctx.strokeStyle = "#aaa";
       ctx.beginPath();
       ctx.moveTo(0, baseY);
       ctx.lineTo(canvas.width, baseY);
       ctx.stroke();
-      // Lens
       ctx.strokeStyle = "#1976d2";
       ctx.lineWidth = 5;
       ctx.beginPath();
@@ -86,7 +80,6 @@
       ctx.bezierCurveTo(lensX - 20, baseY - 40, lensX - 20, baseY + 40, lensX, baseY + 60);
       ctx.stroke();
       ctx.lineWidth = 1;
-      // Focal points
       ctx.fillStyle = "#388e3c";
       ctx.beginPath();
       ctx.arc(lensX - focalLen, baseY, 4, 0, 2 * Math.PI);
@@ -95,7 +88,6 @@
       ctx.fillStyle = "#222";
       ctx.fillText("F", lensX - focalLen - 10, baseY - 10);
       ctx.fillText("F'", lensX + focalLen + 4, baseY - 10);
-      // Object
       ctx.strokeStyle = "#f44336";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -109,12 +101,10 @@
       ctx.lineWidth = 1;
       ctx.fillStyle = "#222";
       ctx.fillText("Object", lensX - objDist - 18, baseY - 60);
-      // Image (using lens formula)
       let do_ = objDist;
       let f = focalLen;
       let di = (do_ * f) / (do_ - f);
       let hi = -50 * di / do_;
-      // Draw image
       ctx.strokeStyle = "#7e57c2";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -128,16 +118,13 @@
       ctx.lineWidth = 1;
       ctx.fillStyle = "#222";
       ctx.fillText("Image", lensX + di + 8, baseY - hi - 8);
-      // Rays
       ctx.strokeStyle = "#009688";
       ctx.setLineDash([4, 2]);
-      // Ray 1: parallel to axis, then through F'
       ctx.beginPath();
       ctx.moveTo(lensX - objDist, baseY - 50);
       ctx.lineTo(lensX, baseY - 50);
       ctx.lineTo(lensX + di, baseY - hi);
       ctx.stroke();
-      // Ray 2: through center of lens
       ctx.beginPath();
       ctx.moveTo(lensX - objDist, baseY - 50);
       ctx.lineTo(lensX + di, baseY - hi);

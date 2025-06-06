@@ -1,4 +1,3 @@
-# sokoban.py
 
 class Sokoban:
     """

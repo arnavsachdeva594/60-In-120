@@ -10,7 +10,6 @@
  </head>
  <body class="bg-gray-100 text-gray-900 transition-colors duration-500">
      <div class="flex flex-col items-center justify-center min-h-screen">
-         <!-- Navigation Menu -->
          <nav class="w-full max-w-md text-center mb-8">
              <a href="about.html" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">About Langton's Ant</a>
              <a href="https://github.com/arnavsachdeva594/60-In-120" target="_blank" class="px-4 py-2 text-lg font-semibold text-indigo-600 hover:text-indigo-800">GitHub</a>
@@ -67,7 +66,7 @@
          function init() {
              grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
              ant = { x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2), dir: 0 };
-             canvas.width = gridSize * 5;  // Fixed cell size of 5px
+             canvas.width = gridSize * 5; 
              canvas.height = gridSize * 5;
              draw();
              canvas.classList.add('opacity-100');
@@ -77,15 +76,15 @@
              for (let y = 0; y < gridSize; y++) {
                  for (let x = 0; x < gridSize; x++) {
                      ctx.fillStyle = grid[y][x] ? (isDarkMode ? '#eee' : '#333') : (isDarkMode ? '#111' : '#f9f9f9');
-                     ctx.fillRect(x * 5, y * 5, 5, 5);  // Fixed cell size of 5px
+                     ctx.fillRect(x * 5, y * 5, 5, 5);  
                  }
              }
              ctx.fillStyle = 'red';
-             ctx.fillRect(ant.x * 5, ant.y * 5, 5, 5);  // Fixed cell size of 5px
+             ctx.fillRect(ant.x * 5, ant.y * 5, 5, 5);  
          }
  
          function step() {
-             if (turnRule === 0) {  // Basic Langton's Ant (Left Turn)
+             if (turnRule === 0) {  
                  if (grid[ant.y][ant.x] === 0) {
                      ant.dir = (ant.dir + 1) % 4;
                      grid[ant.y][ant.x] = 1;
@@ -93,7 +92,7 @@
                      ant.dir = (ant.dir + 3) % 4;
                      grid[ant.y][ant.x] = 0;
                  }
-             } else {  // Alternate rule (Right Turn or other behavior)
+             } else {  
                  if (grid[ant.y][ant.x] === 0) {
                      ant.dir = (ant.dir + 3) % 4;
                      grid[ant.y][ant.x] = 1;
@@ -154,7 +153,7 @@
  
          speedSlider.addEventListener('input', () => {
              speed = +speedSlider.value;
-             speed = 500 - speedSlider.value;  // Invert the value (max value = 500)
+             speed = 500 - speedSlider.value; 
              speedLabel.textContent = speed;
              if (interval) {
                  pause();

@@ -1,4 +1,3 @@
-# solver.py
 
 import heapq
 import numpy as np
@@ -45,11 +44,9 @@ class SokobanSolver:
         y, x = pos
         if pos in self.goals:
             return False
-        # Horizontal edge
         if ((y-1, x) in self.walls or (y+1, x) in self.walls):
             if all((y, gx) not in self.goals for gx in range(len(self.game.grid[0]))):
                 return True
-        # Vertical edge
         if ((y, x-1) in self.walls or (y, x+1) in self.walls):
             if all((gy, x) not in self.goals for gy in range(len(self.game.grid))):
                 return True
@@ -69,7 +66,6 @@ class SokobanSolver:
             if dest in self.walls:
                 continue
             if dest in boxes:
-                # Try to push box
                 by, bx = ny + dy, nx + dx
                 new_box = (by, bx)
                 if new_box in self.walls or new_box in boxes:

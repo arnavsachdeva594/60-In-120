@@ -1,4 +1,3 @@
-# main.py
 
 import time
 from sokoban import Sokoban
@@ -58,7 +57,6 @@ def main():
         ny, nx = player[0]+dy, player[1]+dx
         dest = (ny, nx)
         if dest in boxes:
-            # Push box
             by, bx = ny+dy, nx+dx
             boxes.remove(dest)
             boxes.add((by, bx))
