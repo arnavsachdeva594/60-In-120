@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connect Four with Stronger AI</title>
+  <title>Connect Four with Improved AI</title>
   <style>
     body {
       font-family: sans-serif;
@@ -129,7 +129,6 @@
         gameOver = true;
         return;
       }
-
       if (isBoardFull()) {
         statusDiv.textContent = "It's a draw!";
         gameOver = true;
@@ -140,6 +139,7 @@
         currentPlayer = AI;
         statusDiv.textContent = "AI is thinking...";
         setTimeout(() => {
+          // Call minimax with depth=5 (you can try 4 or 6 to adjust speed/strength)
           const { col: aiCol } = getBestMove(board, 5, -Infinity, Infinity, true);
           const aiRow = getAvailableRowInBoard(board, aiCol);
           placePiece(aiRow, aiCol, AI);
@@ -160,6 +160,7 @@
           statusDiv.textContent = "Your turn!";
         }, 300);
       } else if (!vsAI) {
+        // PvP mode
         currentPlayer = (currentPlayer === PLAYER) ? AI : PLAYER;
         statusDiv.textContent = `${capitalize(currentPlayer)}'s turn`;
       }
@@ -195,6 +196,7 @@
     }
 
     function checkWin(bd, player) {
+      // Horizontal
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c <= COLS - 4; c++) {
           if (bd[r][c] === player &&
@@ -205,6 +207,7 @@
           }
         }
       }
+      // Vertical
       for (let c = 0; c < COLS; c++) {
         for (let r = 0; r <= ROWS - 4; r++) {
           if (bd[r][c] === player &&
@@ -215,6 +218,7 @@
           }
         }
       }
+      // Diagonal “\”
       for (let r = 0; r <= ROWS - 4; r++) {
         for (let c = 0; c <= COLS - 4; c++) {
           if (bd[r][c] === player &&
@@ -225,6 +229,7 @@
           }
         }
       }
+      // Diagonal “/”
       for (let r = 3; r < ROWS; r++) {
         for (let c = 0; c <= COLS - 4; c++) {
           if (bd[r][c] === player &&
@@ -250,9 +255,11 @@
       return bd.map(row => row.slice());
     }
 
+    // Heuristic: “AI’s count” minus “Player’s count” in every possible 4-slot window.
     function scorePosition(bd, playerToScore) {
       let score = 0;
 
+      // Center bonus (encourage AI to take column 3)
       const centerArray = bd.map(row => row[Math.floor(COLS / 2)]);
       const centerCount = centerArray.filter(cell => cell === AI).length;
       if (playerToScore === AI) {
@@ -260,57 +267,53 @@
       }
 
       function countWindow(window, player) {
-        const playerCount = window.filter(cell => cell === player).length;
-        const emptyCount = window.filter(cell => cell === null).length;
-
-        if (playerCount === 4) {
-          return 100;
-        } else if (playerCount === 3 && emptyCount === 1) {
-          return 5;
-        } else if (playerCount === 2 && emptyCount === 2) {
-          return 2;
-        }
+        const countPlayer = window.filter(cell => cell === player).length;
+        const countEmpty  = window.filter(cell => cell === null).length;
+        if (countPlayer === 4) return 100;
+        if (countPlayer === 3 && countEmpty === 1) return 5;
+        if (countPlayer === 2 && countEmpty === 2) return 2;
         return 0;
       }
 
+      // Horizontal
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c <= COLS - 4; c++) {
           const window = [bd[r][c], bd[r][c + 1], bd[r][c + 2], bd[r][c + 3]];
           score += countWindow(window, playerToScore);
         }
       }
-
+      // Vertical
       for (let c = 0; c < COLS; c++) {
         for (let r = 0; r <= ROWS - 4; r++) {
           const window = [
             bd[r][c],
             bd[r + 1][c],
             bd[r + 2][c],
-            bd[r + 3][c],
+            bd[r + 3][c]
           ];
           score += countWindow(window, playerToScore);
         }
       }
-
+      // Diagonal “\”
       for (let r = 0; r <= ROWS - 4; r++) {
         for (let c = 0; c <= COLS - 4; c++) {
           const window = [
             bd[r][c],
             bd[r + 1][c + 1],
             bd[r + 2][c + 2],
-            bd[r + 3][c + 3],
+            bd[r + 3][c + 3]
           ];
           score += countWindow(window, playerToScore);
         }
       }
-
+      // Diagonal “/”
       for (let r = 3; r < ROWS; r++) {
         for (let c = 0; c <= COLS - 4; c++) {
           const window = [
             bd[r][c],
             bd[r - 1][c + 1],
             bd[r - 2][c + 2],
-            bd[r - 3][c + 3],
+            bd[r - 3][c + 3]
           ];
           score += countWindow(window, playerToScore);
         }
@@ -319,79 +322,77 @@
       return score;
     }
 
+    // Zero-sum heuristic: AI’s score minus Player’s score
+    function heuristicValue(bd) {
+      return scorePosition(bd, AI) - scorePosition(bd, PLAYER);
+    }
+
     function isTerminalNode(bd) {
       return (
         checkWin(bd, PLAYER) ||
-        checkWin(bd, AI) ||
+        checkWin(bd, AI)     ||
         getValidLocations(bd).length === 0
       );
     }
 
     /**
-     * Minimax with Alpha‐Beta on a Connect Four board:
-     * @param {Array<Array<string|null>>} bd – current board
-     * @param {number} depth – how many plies to look ahead
-     * @param {number} alpha 
-     * @param {number} beta 
-     * @param {boolean} maximizingPlayer – true iff it’s the AI’s turn
-     * @returns {{ col: number, score: number }} – best column & its score
+     * Minimax with alpha-beta pruning and center-based ordering.
+     * Returns { col, score }.
      */
     function getBestMove(bd, depth, alpha, beta, maximizingPlayer) {
-      const validLocations = getValidLocations(bd);
-      const isTerminal = isTerminalNode(bd);
+      const allLocations = getValidLocations(bd);
+      // Order moves: center first → then outward
+      const order = [3, 2, 4, 1, 5, 0, 6];
+      const validLocations = order.filter(c => allLocations.includes(c));
 
-      if (depth === 0 || isTerminal) {
-        if (isTerminal) {
-          if (checkWin(bd, AI)) {
-            return { col: null, score: 1e6 }; 
-          } else if (checkWin(bd, PLAYER)) {
-            return { col: null, score: -1e6 }; 
-          } else {
-            return { col: null, score: 0 };
-          }
-        } else {
-          const scoreFor = maximizingPlayer ? AI : PLAYER;
-          return { col: null, score: scorePosition(bd, scoreFor) };
+      const terminal = isTerminalNode(bd);
+      if (depth === 0 || terminal) {
+        if (terminal) {
+          if (checkWin(bd, AI)) return { col: null, score: 1e6 };
+          if (checkWin(bd, PLAYER)) return { col: null, score: -1e6 };
+          return { col: null, score: 0 }; // draw
         }
+        // Depth=0 but not terminal: use zero-sum heuristic
+        return { col: null, score: heuristicValue(bd) };
       }
 
       if (maximizingPlayer) {
+        // AI to play → maximize heuristic
         let value = -Infinity;
         let bestCol = validLocations[0];
-
         for (let col of validLocations) {
           const row = getAvailableRowInBoard(bd, col);
-          const tempBoard = copyBoard(bd);
-          tempBoard[row][col] = AI;
+          const temp = copyBoard(bd);
+          temp[row][col] = AI;
 
-          const newScoreObj = getBestMove(tempBoard, depth - 1, alpha, beta, false);
-          if (newScoreObj.score > value) {
-            value = newScoreObj.score;
+          const { score: newScore } = getBestMove(temp, depth - 1, alpha, beta, false);
+          if (newScore > value) {
+            value = newScore;
             bestCol = col;
           }
           alpha = Math.max(alpha, value);
           if (alpha >= beta) {
-            break; 
+            break; // β cutoff
           }
         }
         return { col: bestCol, score: value };
       } else {
+        // PLAYER to play → minimize heuristic
         let value = Infinity;
         let bestCol = validLocations[0];
-
         for (let col of validLocations) {
           const row = getAvailableRowInBoard(bd, col);
-          const tempBoard = copyBoard(bd);
-          tempBoard[row][col] = PLAYER;
+          const temp = copyBoard(bd);
+          temp[row][col] = PLAYER;
 
-          const newScoreObj = getBestMove(tempBoard, depth - 1, alpha, beta, true);
-          if (newScoreObj.score < value) {
-            value = newScoreObj.score;
+          const { score: newScore } = getBestMove(temp, depth - 1, alpha, beta, true);
+          if (newScore < value) {
+            value = newScore;
             bestCol = col;
           }
           beta = Math.min(beta, value);
           if (alpha >= beta) {
-            break; 
+            break; // α cutoff
           }
         }
         return { col: bestCol, score: value };
@@ -402,7 +403,7 @@
       return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
-    // Initialize game on load
+    // Kick off the first board
     initBoard();
   </script>
 </body>
