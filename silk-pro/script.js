@@ -1,3 +1,4 @@
+// Canvas setup
 const canvas = document.getElementById('c'),
       ctx    = canvas.getContext('2d'),
       dpr    = window.devicePixelRatio || 1;
@@ -12,6 +13,7 @@ function resize(){
 window.addEventListener('resize', resize);
 resize();
 
+// Controls
 const CTL = {
   sym:       document.getElementById('sym'),
   size:      document.getElementById('size'),
@@ -28,10 +30,12 @@ const CTL = {
   sliders:   document.querySelectorAll('input[type=range]')
 };
 
+// Sidebar toggle
 CTL.toggle.addEventListener('click', () => {
   CTL.sidebar.classList.toggle('collapsed');
 });
 
+// Random palette
 CTL.rand.addEventListener('click', () => {
   const rnd = () => Math.floor(Math.random()*0xFFFFFF)
                        .toString(16).padStart(6,'0');
@@ -39,11 +43,12 @@ CTL.rand.addEventListener('click', () => {
   CTL.end.value   = `#${rnd()}`;
 });
 
+// Undo / Clear / Save
 const history = [];
 CTL.clear.addEventListener('click', () => {
   history.length = 0;
   const bg = getComputedStyle(document.body).getPropertyValue('--bg')?.trim();
-  ctx.fillStyle = bg || '#111111';
+  ctx.fillStyle = bg || '#ffffff';
   ctx.fillRect(0, 0, innerWidth, innerHeight);
 });
 CTL.undo.addEventListener('click', () => {
@@ -56,16 +61,18 @@ CTL.save.addEventListener('click', () => {
   a.click();
 });
 
+// Slider fill styling
 function styleFill(slider){
   const pct = (slider.value - slider.min)/(slider.max - slider.min)*100;
   slider.style.background = 
-    `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, rgba(255,255,255,0.2) ${pct}%, rgba(255,255,255,0.2) 100%)`;
+    `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, rgba(0,0,0,0.1) ${pct}%, rgba(0,0,0,0.1) 100%)`;
 }
 CTL.sliders.forEach(s => {
   styleFill(s);
   s.addEventListener('input', () => styleFill(s));
 });
 
+// Drawing state
 let drawing=false, pts=[];
 function down(e){
   drawing=true; pts=[];
@@ -86,6 +93,7 @@ function move(e){
   canvas.addEventListener(ev, e=>{e.preventDefault(); move(e);});
 });
 
+// Color lerp
 function lerp(a,b,t){
   const A=parseInt(a.slice(1),16), B=parseInt(b.slice(1),16);
   const [ar,ag,ab]=[A>>16,(A>>8)&0xff,A&0xff],
@@ -94,6 +102,7 @@ function lerp(a,b,t){
   return `rgb(${rr|0},${gg|0},${bb2|0})`;
 }
 
+// Draw brush
 function drawBrush(type, dx, dy, size, col, p0x, p0y){
   switch(type){
     case 'circle':
@@ -112,14 +121,15 @@ function drawBrush(type, dx, dy, size, col, p0x, p0y){
         ctx.fillRect(dx+Math.cos(a)*r, dy+Math.sin(a)*r,1,1);
       }
       break;
-    default:
+    default: // line
       ctx.strokeStyle=col; ctx.lineWidth=size; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(p0x,p0y); ctx.lineTo(dx,dy); ctx.stroke();
   }
 }
 
+// Main loop
 function draw(){
-  ctx.fillStyle=`rgba(17,17,17,${parseFloat(CTL.fade.value)})`;
+  ctx.fillStyle=`rgba(255,255,255,${parseFloat(CTL.fade.value)})`;
   ctx.fillRect(0,0,innerWidth,innerHeight);
 
   if(pts.length>1){
@@ -146,7 +156,8 @@ function draw(){
   requestAnimationFrame(draw);
 }
 
+// Init
 const initBG = getComputedStyle(document.body).getPropertyValue('--bg')?.trim();
-ctx.fillStyle = initBG || '#111111';
+ctx.fillStyle = initBG || '#ffffff';
 ctx.fillRect(0,0,innerWidth,innerHeight);
 draw();
