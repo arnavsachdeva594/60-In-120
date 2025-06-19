@@ -1,0 +1,28 @@
+html, body { margin:0; padding:0; overflow:hidden; background:#111; }
+canvas { display:block; }
+
+#controls {
+  position: fixed; top: 10px; left: 10px;
+  background: rgba(0,0,0,0.6); padding: 12px;
+  border-radius: 8px; color: #eee; font-family:sans-serif;
+  user-select: none; z-index: 10;
+}
+#controls h2 { margin:0 0 8px; font-size:1.1em; }
+#controls label {
+  display: block; margin:6px 0; font-size:0.9em;
+}
+#controls input[type=range] { width: 120px; vertical-align: middle; }
+#controls input[type=color], #controls select {
+  vertical-align: middle; margin-left: 4px;
+}
+#controls select {
+  background: #222; color: #eee; border:1px solid #555;
+  padding:2px 4px; font-size:0.9em;
+}
+#controls button {
+  margin:4px 4px 0 0; padding:4px 8px;
+  background:#333; border:1px solid #555; color:#eee;
+  cursor: pointer; font-size:0.9em;
+}
+#controls button:hover { background:#444; }
+.credits { margin-top:10px; font-size:0.75em; color:#777; }
