@@ -1,66 +1,72 @@
 const canvas = document.getElementById('c'),
       ctx    = canvas.getContext('2d'),
       dpr    = window.devicePixelRatio || 1;
-
-let W, H;
+let W,H;
 function resize(){
   W = canvas.width  = innerWidth * dpr;
   H = canvas.height = innerHeight * dpr;
   canvas.style.width  = innerWidth + 'px';
   canvas.style.height = innerHeight + 'px';
-  ctx.scale(dpr, dpr);
+  ctx.scale(dpr,dpr);
 }
 window.addEventListener('resize', resize);
 resize();
 
-const ctl = {
+const CTL = {
   sym:       document.getElementById('sym'),
-  symVal:    document.getElementById('symVal'),
   size:      document.getElementById('size'),
-  sizeVal:   document.getElementById('sizeVal'),
   fade:      document.getElementById('fade'),
-  fadeVal:   document.getElementById('fadeVal'),
-  brushType: document.getElementById('brushType'),
-  colStart:  document.getElementById('colStart'),
-  colEnd:    document.getElementById('colEnd'),
-  randPalette: document.getElementById('randPalette'),
+  brush:     document.getElementById('brushType'),
+  start:     document.getElementById('colStart'),
+  end:       document.getElementById('colEnd'),
+  rand:      document.getElementById('randPalette'),
   undo:      document.getElementById('undo'),
   clear:     document.getElementById('clear'),
   save:      document.getElementById('save'),
+  toggle:    document.getElementById('toggleBtn'),
+  sidebar:   document.getElementById('sidebar'),
+  sliders:   document.querySelectorAll('input[type=range]')
 };
-function updateLabels(){
-  ctl.symVal.textContent  = ctl.sym.value;
-  ctl.sizeVal.textContent = ctl.size.value;
-  ctl.fadeVal.textContent = ctl.fade.value;
-}
-Object.values(ctl).forEach(el=>{
-  if(el.tagName==='INPUT') el.addEventListener('input', updateLabels);
-});
-updateLabels();
 
-ctl.randPalette.addEventListener('click', ()=>{
-  const rnd = ()=>Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0');
-  ctl.colStart.value = `#${rnd()}`;
-  ctl.colEnd.value   = `#${rnd()}`;
+CTL.toggle.addEventListener('click', () => {
+  CTL.sidebar.classList.toggle('collapsed');
+});
+
+CTL.rand.addEventListener('click', () => {
+  const rnd = () => Math.floor(Math.random()*0xFFFFFF)
+                       .toString(16).padStart(6,'0');
+  CTL.start.value = `#${rnd()}`;
+  CTL.end.value   = `#${rnd()}`;
 });
 
 const history = [];
-ctl.clear.addEventListener('click', ()=>{
+CTL.clear.addEventListener('click', () => {
   history.length = 0;
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,innerWidth,innerHeight);
+  const bg = getComputedStyle(document.body).getPropertyValue('--bg')?.trim();
+  ctx.fillStyle = bg || '#111111';
+  ctx.fillRect(0, 0, innerWidth, innerHeight);
 });
-ctl.undo.addEventListener('click', ()=>{
-  if(history.length) ctx.putImageData(history.pop(),0,0);
+CTL.undo.addEventListener('click', () => {
+  if (history.length) ctx.putImageData(history.pop(),0,0);
 });
-ctl.save.addEventListener('click', ()=>{
+CTL.save.addEventListener('click', () => {
   const a = document.createElement('a');
-  a.download = 'silk-pro-brushes.png';
-  a.href = canvas.toDataURL();
+  a.download = 'silk-pro-vibe.png';
+  a.href     = canvas.toDataURL();
   a.click();
 });
 
-let drawing=false, pts=[];
+function styleFill(slider){
+  const pct = (slider.value - slider.min)/(slider.max - slider.min)*100;
+  slider.style.background = 
+    `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, rgba(255,255,255,0.2) ${pct}%, rgba(255,255,255,0.2) 100%)`;
+}
+CTL.sliders.forEach(s => {
+  styleFill(s);
+  s.addEventListener('input', () => styleFill(s));
+});
 
+let drawing=false, pts=[];
 function down(e){
   drawing=true; pts=[];
   history.push(ctx.getImageData(0,0,innerWidth,innerHeight));
@@ -69,125 +75,69 @@ function down(e){
 function up(){ drawing=false; pts=[]; }
 function move(e){
   if(!drawing) return;
-  const x = (e.clientX||e.touches[0].clientX),
-        y = (e.clientY||e.touches[0].clientY);
+  const x = e.clientX || e.touches[0].clientX,
+        y = e.clientY || e.touches[0].clientY;
   pts.push({x,y});
   if(pts.length>60) pts.shift();
 }
 ['mousedown','touchstart'].forEach(ev=>canvas.addEventListener(ev,down));
 ['mouseup','mouseleave','touchend'].forEach(ev=>canvas.addEventListener(ev,up));
 ['mousemove','touchmove'].forEach(ev=>{
-  canvas.addEventListener(ev,e=>{ e.preventDefault(); move(e); });
+  canvas.addEventListener(ev, e=>{e.preventDefault(); move(e);});
 });
 
-function lerpColor(a,b,t){
+function lerp(a,b,t){
   const A=parseInt(a.slice(1),16), B=parseInt(b.slice(1),16);
-  const [ar,ag,ab] = [A>>16, (A>>8)&0xff, A&0xff];
-  const [br,bg,bb] = [B>>16, (B>>8)&0xff, B&0xff];
-  const rr = Math.round(ar + (br-ar)*t),
-        gg = Math.round(ag + (bg-ag)*t),
-        bb2= Math.round(ab + (bb-ab)*t);
-  return `rgb(${rr},${gg},${bb2})`;
+  const [ar,ag,ab]=[A>>16,(A>>8)&0xff,A&0xff],
+        [br,bg,bb]=[B>>16,(B>>8)&0xff,B&0xff];
+  const rr=ar+(br-ar)*t, gg=ag+(bg-ag)*t, bb2=ab+(bb-ab)*t;
+  return `rgb(${rr|0},${gg|0},${bb2|0})`;
+}
+
+function drawBrush(type, dx, dy, size, col, p0x, p0y){
+  switch(type){
+    case 'circle':
+      ctx.fillStyle=col; ctx.beginPath();
+      ctx.arc(dx,dy,size*1.5,0,2*Math.PI); ctx.fill();
+      break;
+    case 'square':
+      ctx.fillStyle=col; ctx.save();
+      ctx.translate(dx,dy); ctx.rotate(Math.PI/4);
+      ctx.fillRect(-size,-size,size*2,size*2); ctx.restore();
+      break;
+    case 'spray':
+      ctx.fillStyle=col;
+      for(let i=0;i<size*5;i++){
+        const a=Math.random()*2*Math.PI, r=Math.random()*size*4;
+        ctx.fillRect(dx+Math.cos(a)*r, dy+Math.sin(a)*r,1,1);
+      }
+      break;
+    default:
+      ctx.strokeStyle=col; ctx.lineWidth=size; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(p0x,p0y); ctx.lineTo(dx,dy); ctx.stroke();
+  }
 }
 
 function draw(){
-  ctx.fillStyle = `rgba(17,17,17,${parseFloat(ctl.fade.value)})`;
+  ctx.fillStyle=`rgba(17,17,17,${parseFloat(CTL.fade.value)})`;
   ctx.fillRect(0,0,innerWidth,innerHeight);
 
   if(pts.length>1){
-    const s    = +ctl.sym.value,
-          bw   = +ctl.size.value,
-          start= ctl.colStart.value,
-          end  = ctl.colEnd.value,
-          brush= ctl.brushType.value;
+    const sym=+CTL.sym.value, sz=+CTL.size.value,
+          type=CTL.brush.value, c0=CTL.start.value, c1=CTL.end.value;
 
-    for(let i=1; i<pts.length; i++){
-      const p0 = pts[i-1], p1 = pts[i];
-      const t  = i/(pts.length-1);
-      const col= lerpColor(start,end,t);
-      
-      for(let k=0; k<s; k++){
-        const ang = (Math.PI*2/s)*k;
-        ctx.save();
-        ctx.translate(innerWidth/2, innerHeight/2);
-        ctx.rotate(ang);
+    for(let i=1;i<pts.length;i++){
+      const p0=pts[i-1], p1=pts[i], t=i/(pts.length-1),
+            col=lerp(c0,c1,t),
+            dx1=p1.x-innerWidth/2, dy1=p1.y-innerHeight/2,
+            dx0=p0.x-innerWidth/2, dy0=p0.y-innerHeight/2;
 
-        switch(brush){
-          case 'circle':
-            ctx.fillStyle = col;
-            ctx.beginPath();
-            ctx.arc(p1.x - innerWidth/2, p1.y - innerHeight/2, bw*1.5, 0, 2*Math.PI);
-            ctx.fill();
-            break;
-
-          case 'square':
-            ctx.fillStyle = col;
-            const size = bw*2;
-            ctx.save();
-            ctx.translate(p1.x - innerWidth/2, p1.y - innerHeight/2);
-            ctx.rotate(Math.PI/4);
-            ctx.fillRect(-size/2, -size/2, size, size);
-            ctx.restore();
-            break;
-
-          case 'spray':
-            for(let j=0; j< bw*5; j++){
-              const angle = Math.random()*2*Math.PI;
-              const radius= Math.random()*bw*4;
-              const sx = p1.x - innerWidth/2 + Math.cos(angle)*radius;
-              const sy = p1.y - innerHeight/2 + Math.sin(angle)*radius;
-              ctx.fillStyle = col;
-              ctx.fillRect(sx, sy, 1, 1);
-            }
-            break;
-
-          default: // 'line'
-            ctx.strokeStyle = col;
-            ctx.lineCap     = 'round';
-            ctx.lineWidth   = bw;
-            ctx.beginPath();
-            ctx.moveTo(p0.x - innerWidth/2, p0.y - innerHeight/2);
-            ctx.lineTo(p1.x - innerWidth/2, p1.y - innerHeight/2);
-            ctx.stroke();
-        }
-
-        ctx.scale(-1,1);
-        switch(brush){
-          case 'circle':
-            ctx.fillStyle = col;
-            ctx.beginPath();
-            ctx.arc(p1.x - innerWidth/2, p1.y - innerHeight/2, bw*1.5, 0, 2*Math.PI);
-            ctx.fill();
-            break;
-          case 'square':
-            ctx.fillStyle = col;
-            const sz = bw*2;
-            ctx.save();
-            ctx.translate(p1.x - innerWidth/2, p1.y - innerHeight/2);
-            ctx.rotate(Math.PI/4);
-            ctx.fillRect(-sz/2, -sz/2, sz, sz);
-            ctx.restore();
-            break;
-          case 'spray':
-            for(let j=0; j< bw*5; j++){
-              const angle = Math.random()*2*Math.PI;
-              const radius= Math.random()*bw*4;
-              const sx = p1.x - innerWidth/2 + Math.cos(angle)*radius;
-              const sy = p1.y - innerHeight/2 + Math.sin(angle)*radius;
-              ctx.fillStyle = col;
-              ctx.fillRect(sx, sy, 1, 1);
-            }
-            break;
-          default:
-            ctx.strokeStyle = col;
-            ctx.lineCap     = 'round';
-            ctx.lineWidth   = bw;
-            ctx.beginPath();
-            ctx.moveTo(p0.x - innerWidth/2, p0.y - innerHeight/2);
-            ctx.lineTo(p1.x - innerWidth/2, p1.y - innerHeight/2);
-            ctx.stroke();
-        }
-
+      for(let s=0;s<sym;s++){
+        const ang=(2*Math.PI/sym)*s;
+        ctx.save(); ctx.translate(innerWidth/2,innerHeight/2); ctx.rotate(ang);
+          drawBrush(type,dx1,dy1,sz,col,dx0,dy0);
+          ctx.scale(-1,1);
+          drawBrush(type,dx1,dy1,sz,col,dx0,dy0);
         ctx.restore();
       }
     }
@@ -196,5 +146,7 @@ function draw(){
   requestAnimationFrame(draw);
 }
 
-ctx.fillStyle = '#111'; ctx.fillRect(0,0,innerWidth,innerHeight);
+const initBG = getComputedStyle(document.body).getPropertyValue('--bg')?.trim();
+ctx.fillStyle = initBG || '#111111';
+ctx.fillRect(0,0,innerWidth,innerHeight);
 draw();

@@ -3,42 +3,60 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Silk Pro • Brushes</title>
+  <title>Silk Pro • Vibe Edition</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/feather-icons"></script>
+
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div id="controls">
-    <h2>Silk Pro Controls</h2>
-    <label>Symmetry: <span id="symVal">8</span>
-      <input id="sym" type="range" min="2" max="24" value="8"/>
-    </label>
-    <label>Brush Size: <span id="sizeVal">3</span>
-      <input id="size" type="range" min="1" max="20" value="3"/>
-    </label>
-    <label>Trail Fade: <span id="fadeVal">0.05</span>
-      <input id="fade" type="range" min="0" max="0.2" step="0.005" value="0.05"/>
-    </label>
-    <label>Brush Type:
-      <select id="brushType">
-        <option value="line">Line</option>
-        <option value="circle">Circle</option>
-        <option value="square">Square</option>
-        <option value="spray">Spray</option>
-      </select>
-    </label>
-    <label>Start Color:
-      <input id="colStart" type="color" value="#ff3f8e"/>
-    </label>
-    <label>End Color:
-      <input id="colEnd" type="color" value="#2e55c1"/>
-    </label>
-    <button id="randPalette">Random Palette</button>
-    <button id="undo">Undo</button>
-    <button id="clear">Clear</button>
-    <button id="save">Save PNG</button>
-    <p class="credits">Silk Pro • Brushes</p>
-  </div>
+
+  <button id="toggleBtn" title="Toggle Controls">
+    <i data-feather="settings"></i>
+  </button>
+
+  <aside id="sidebar" class="collapsed">
+    <div class="controls">
+      <h2>Silk Pro Vibe</h2>
+
+      <label><span>Symmetry</span>
+        <input id="sym" type="range" min="2" max="24" value="8"/>
+      </label>
+
+      <label><span>Brush Size</span>
+        <input id="size" type="range" min="1" max="20" value="3"/>
+      </label>
+
+      <label><span>Trail Fade</span>
+        <input id="fade" type="range" min="0" max="0.2" step="0.005" value="0.05"/>
+      </label>
+
+      <label><span>Brush</span>
+        <select id="brushType">
+          <option value="line">Line</option>
+          <option value="circle">Circle</option>
+          <option value="square">Square</option>
+          <option value="spray">Spray</option>
+        </select>
+      </label>
+
+      <div class="color-pickers">
+        <label><span>Start</span><input id="colStart" type="color" value="#ff3f8e"/></label>
+        <label><span>End</span><input id="colEnd" type="color" value="#2e55c1"/></label>
+      </div>
+
+      <div class="buttons">
+        <button id="randPalette" title="Random Palette"><i data-feather="palette"></i></button>
+        <button id="undo"         title="Undo"><i data-feather="rotate-ccw"></i></button>
+        <button id="clear"        title="Clear"><i data-feather="trash-2"></i></button>
+        <button id="save"         title="Save PNG"><i data-feather="download"></i></button>
+      </div>
+    </div>
+  </aside>
+
   <canvas id="c"></canvas>
   <script src="script.js"></script>
+  <script>feather.replace()</script>
 </body>
 </html>
