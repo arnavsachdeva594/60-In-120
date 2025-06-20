@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fragments of Eternity - Interactive Journey</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@200;300;400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            scroll-behavior: auto;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #f5f5f5;
+            position: relative;
+            height: auto;
+        }
+        
+        /* Custom Cursor */
+        .cursor {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease;
+        }
+        
+        .cursor-glow {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Loading Experience */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+            transition: opacity 2s ease;
+        }
+        
+        .loading-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 300;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { opacity: 0.3; transform: translateY(20px) scale(0.98); }
+            50% { opacity: 1; transform: translateY(0) scale(1.02); }
+        }
+        
+        /* WebGL Background */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.6;
+        }
+        
+        /* Main Content Layers */
+        .content-layer {
+            position: relative;
+            z-index: 100;
+            min-height: 100vh;
+        }
+        
+        /* Fragment Sections */
+        .fragment {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5vw;
+            overflow: hidden;
+        }
+        
+        /* Title Fragment */
+        .fragment-title {
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, rgba(20, 20, 40, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+        }
+        
+        .title-main {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 12rem);
+            font-weight: 300;
+            line-height: 0.9;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(100px);
+            letter-spacing: -0.02em;
+        }
+        
+        .title-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 200;
+            opacity: 0.7;
+            transform: translateY(50px);
+            opacity: 0;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        /* Memory Fragments */
+        .fragment-memory {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10vw;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .memory-text {
+            padding: 2rem 0;
+        }
+        
+        .memory-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 5vw, 6rem);
+            font-weight: 400;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateX(-100px);
+            line-height: 1.1;
+        }
+        
+        .memory-body {
+            font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+            line-height: 1.8;
+            opacity: 0;
+            transform: translateX(-50px);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.85);
+            transition: all 0.4s ease;
+        }
+        
+        .memory-visual {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.8);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .visual-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(100, 150, 200, 0.3) 0%, 
+                rgba(200, 100, 150, 0.3) 50%, 
+                rgba(150, 200, 100, 0.3) 100%);
+            opacity: 0.6;
+            animation: colorShift 20s ease-in-out infinite;
+        }
+        
+        @keyframes colorShift {
+            0%, 100% { 
+                background: linear-gradient(45deg, rgba(100, 150, 200, 0.3) 0%, rgba(200, 100, 150, 0.3) 50%, rgba(150, 200, 100, 0.3) 100%);
+            }
+            33% { 
+                background: linear-gradient(135deg, rgba(200, 100, 150, 0.3) 0%, rgba(150, 200, 100, 0.3) 50%, rgba(100, 150, 200, 0.3) 100%);
+            }
+            66% { 
+                background: linear-gradient(225deg, rgba(150, 200, 100, 0.3) 0%, rgba(100, 150, 200, 0.3) 50%, rgba(200, 100, 150, 0.3) 100%);
+            }
+        }
+        
+        /* Interactive Revelation */
+        .fragment-revelation {
+            text-align: center;
+            padding: 10vh 5vw;
+            position: relative;
+        }
+        
+        .revelation-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .revelation-prompt {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            margin-bottom: 4rem;
+            opacity: 0;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .hold-to-reveal {
+            width: 200px;
+            height: 200px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            margin: 0 auto 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            opacity: 0;
+        }
+        
+        .hold-progress {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            width: calc(100% + 6px);
+            height: calc(100% + 6px);
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(255, 255, 255, 0.8) 0deg, transparent 0deg);
+            transition: all 0.1s ease;
+        }
+        
+        .hold-text {
+            font-size: 1.1rem;
+            font-weight: 300;
+            z-index: 1;
+        }
+        
+        .revealed-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            line-height: 1.4;
+            opacity: 0;
+            transform: scale(0.8);
+            font-weight: 400;
+            transition: all 1s ease;
+        }
+        
+        /* Breath Section */
+        .fragment-breath {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100vh;
+            padding: 5vh;
+        }
+        
+        .breath-instruction {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 4rem;
+            opacity: 0;
+            font-weight: 300;
+        }
+        
+        .breath-circle {
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3rem;
+            opacity: 0;
+            position: relative;
+        }
+        
+        .breath-inner {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transition: all 4s ease-in-out;
+        }
+        
+        .breath-prompt {
+            font-size: 1.2rem;
+            opacity: 0;
+            font-weight: 300;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Time Fragments */
+        .fragment-time {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 40, 0.7) 100%);
+        }
+        
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 0;
+        }
+        
+        .time-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(100px);
+            transition: all 0.3s ease;
+        }
+        
+        .time-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .time-era {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .time-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Final Fragment */
+        .fragment-final {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, rgba(0, 0, 20, 0.8) 0%, rgba(0, 0, 0, 1) 100%);
+        }
+        
+        .final-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            line-height: 1.6;
+            max-width: 800px;
+            opacity: 0;
+            transform: translateY(50px);
+            font-weight: 300;
+        }
+        
+        /* Floating Particles */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .fragment-memory {
+                grid-template-columns: 1fr;
+                gap: 5vh;
+                text-align: center;
+            }
+            
+            .memory-title, .memory-body {
+                transform: translateY(50px);
+            }
+            
+            .time-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .hold-to-reveal {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .breath-circle {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .breath-inner {
+                width: 150px;
+                height: 150px;
+            }
+        }
+        
+        /* Gaze Tracking Effects */
+        .gaze-responsive {
+            transition: transform 0.3s ease;
+        }
+        
+        /* Audio Trigger Zones */
+        .audio-zone {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        
+        .audio-zone:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.2);
+            opacity: 1;
+        }
+        
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .scroll-line {
+            width: 2px;
+            height: 50px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.6), transparent);
+            margin: 0 auto 10px;
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .scroll-text {
+            font-size: 0.8rem;
+            text-align: center;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        /* Time of Day Effects */
+        .night-theme {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #111126;
+            --accent-color: #6a5acd;
+        }
+        
+        .day-theme {
+            --primary-bg: #121220;
+            --secondary-bg: #1c1c3a;
+            --accent-color: #ff6b6b;
+        }
+        
+        .evening-theme {
+            --primary-bg: #1a0a1a;
+            --secondary-bg: #2a0f2a;
+            --accent-color: #ff9a76;
+        }
+        
+        body {
+            background: var(--primary-bg);
+            transition: background 2s ease;
+        }
+        
+        .fragment-time {
+            background: linear-gradient(180deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+        }
+        
+        .visual-overlay {
+            background: linear-gradient(45deg, 
+                rgba(var(--accent-rgb), 0.3) 0%, 
+                rgba(200, 100, 150, 0.3) 50%, 
+                rgba(150, 200, 100, 0.3) 100%);
+        }
+        
+        /* Fixed element to prevent layout shifts */
+        .scroll-container {
+            position: relative;
+            z-index: 100;
+        }
+        
+        /* Debug indicator */
+        .debug-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            z-index: 10000;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        /* Emotional State Effects */
+        .calm-state {
+            --particle-speed: 0.0005;
+            --cursor-glow-size: 40px;
+            --cursor-glow-color: rgba(119, 170, 255, 0.1);
+        }
+        
+        .neutral-state {
+            --particle-speed: 0.002;
+            --cursor-glow-size: 40px;
+            --cursor-glow-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .anxious-state {
+            --particle-speed: 0.005;
+            --cursor-glow-size: 60px;
+            --cursor-glow-color: rgba(255, 119, 119, 0.15);
+        }
+        
+        .cursor-glow {
+            width: var(--cursor-glow-size);
+            height: var(--cursor-glow-size);
+            background: radial-gradient(circle, var(--cursor-glow-color) 0%, transparent 70%);
+            transition: all 0.5s ease;
+        }
+        
+        /* Liquid Text Effects */
+        .memory-body:hover {
+            filter: blur(1px) contrast(1.2);
+            transform: translateX(-50px) skewY(1deg) scale(1.02);
+        }
+        
+        .liquid-text {
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .liquid-text:hover {
+            animation: liquidFlow 3s ease-in-out infinite;
+            background: linear-gradient(90deg, #6a5acd, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transform: translateY(-5px);
+        }
+        
+        @keyframes liquidFlow {
+            0%, 100% { 
+                transform: translateY(0) skewX(0deg);
+                background-position: 0% 50%;
+            }
+            25% { 
+                transform: translateY(-3px) skewX(2deg);
+            }
+            50% { 
+                transform: translateY(0) skewX(0deg);
+                background-position: 100% 50%;
+            }
+            75% { 
+                transform: translateY(-3px) skewX(-2deg);
+            }
+        }
+        
+        /* Generative Poetry */
+        .generated-haiku {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            line-height: 1.6;
+            max-width: 800px;
+            opacity: 0;
+            margin-top: 3rem;
+            font-weight: 300;
+            font-style: italic;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Collective Heatmap */
+        .heatmap-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.3;
+        }
+        
+        .heatmap-point {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 100, 100, 0.5) 0%, transparent 70%);
+            filter: blur(10px);
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Time Dilation */
+        .time-dilation {
+            transform: scale(0.98);
+            filter: grayscale(30%) blur(0.5px);
+            transition: all 0.5s ease;
+        }
+        
+        .time-dilation-active {
+            filter: grayscale(0) blur(0);
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loading">
+        <div class="loading-text">Awakening memories...</div>
+    </div>
+    
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    
+    <!-- WebGL Background -->
+    <canvas id="webgl-canvas"></canvas>
+    
+    <!-- Debug indicator -->
+    <div class="debug-indicator" id="debugIndicator">Scroll: 0%</div>
+    
+    <!-- Heatmap Overlay -->
+    <div class="heatmap-overlay" id="heatmapOverlay"></div>
+    
+    <!-- Scroll Container -->
+    <div class="scroll-container">
+            
+        <!-- Title Fragment -->
+        <div class="fragment fragment-title" id="titleFragment">
+            <h1 class="title-main">Fragments<br>of Eternity</h1>
+            <p class="title-subtitle">A journey through the endless cycle of memory, time, and the human spirit</p>
+        </div>
+        
+        <!-- Memory Fragment 1: Dawn -->
+        <div class="fragment fragment-memory" id="memoryFragment1">
+            <div class="fragment-memory">
+                <div class="memory-text">
+                    <h2 class="memory-title">The First Light</h2>
+                    <p class="memory-body">Before the first word was spoken, before the first fire was kindled, there existed only the vast silence of possibility. In that primordial moment, consciousness stirred like dawn breaking over an endless ocean, and humanity began its eternal dance with time.</p>
+                </div>
+                <div class="memory-visual gaze-responsive">
+                    <div class="visual-overlay"></div>
+                    <div class="audio-zone" style="top: 20%; left: 30%;" data-sound="dawn"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Memory Fragment 2: Civilization -->
+        <div class="fragment fragment-memory" id="memoryFragment2">
+            <div class="fragment-memory">
+                <div class="memory-visual gaze-responsive">
+                    <div class="visual-overlay"></div>
+                    <div class="audio-zone" style="top: 60%; left: 70%;" data-sound="civilization"></div>
+                </div>
+                <div class="memory-text">
+                    <h2 class="memory-title">The Builders</h2>
+                    <p class="memory-body">Stone by stone, dream by dream, we raised monuments to our longing for permanence. Each civilization believed it would last forever, each generation convinced it stood at history's pinnacle, never knowing they were merely echoes of those who came before.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Revelation -->
+        <div class="fragment fragment-revelation" id="revelationFragment">
+            <div class="revelation-container">
+                <p class="revelation-prompt">Hold to peel back the layers of time...</p>
+                <div class="hold-to-reveal" id="holdCircle">
+                    <div class="hold-progress" id="holdProgress"></div>
+                    <div class="hold-text">Press & Hold</div>
+                </div>
+                <div class="revealed-text" id="revealedText">
+                    "What we call the past lives not behind us, but within us—a constellation of moments that pulse like stars in the darkness of memory."
+                </div>
+            </div>
+        </div>
+        
+        <!-- Breath Fragment -->
+        <div class="fragment fragment-breath" id="breathFragment">
+            <h3 class="breath-instruction">Breathe with the rhythm of ages</h3>
+            <div class="breath-circle">
+                <div class="breath-inner" id="breathInner"></div>
+            </div>
+            <p class="breath-prompt" id="breathPrompt">Click to begin</p>
+        </div>
+        
+        <!-- Memory Fragment 3: Love -->
+        <div class="fragment fragment-memory" id="memoryFragment3">
+            <div class="fragment-memory">
+                <div class="memory-text">
+                    <h2 class="memory-title">The Thread</h2>
+                    <p class="memory-body">Love threads through time like golden wire, connecting each heart to every heart that came before. A mother's lullaby carries the echo of ten thousand mothers, each voice a note in humanity's eternal song of tenderness and loss.</p>
+                </div>
+                <div class="memory-visual gaze-responsive">
+                    <div class="visual-overlay"></div>
+                    <div class="audio-zone" style="top: 40%; left: 50%;" data-sound="love"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Time Fragments -->
+        <div class="fragment fragment-time" id="timeFragment">
+            <div class="time-grid">
+                <div class="time-card time-dilation">
+                    <h4 class="time-era">Ancient</h4>
+                    <p class="time-description">When humans first looked up at stars and wondered if they were looking back</p>
+                </div>
+                <div class="time-card time-dilation">
+                    <h4 class="time-era">Medieval</h4>
+                    <p class="time-description">When every shadow held a story and every wind carried prayers</p>
+                </div>
+                <div class="time-card time-dilation">
+                    <h4 class="time-era">Renaissance</h4>
+                    <p class="time-description">When art became the language of souls speaking across centuries</p>
+                </div>
+                <div class="time-card time-dilation">
+                    <h4 class="time-era">Industrial</h4>
+                    <p class="time-description">When progress promised to carry us beyond our human limitations</p>
+                </div>
+                <div class="time-card time-dilation">
+                    <h4 class="time-era">Digital</h4>
+                    <p class="time-description">When connection became instant but intimacy grew ever more distant</p>
+                </div>
+                <div class="time-card time-dilation">
+                    <h4 class="time-era">Tomorrow</h4>
+                    <p class="time-description">When we finally understand that all time exists in this single, eternal moment</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Fragment -->
+        <div class="fragment fragment-final" id="finalFragment">
+            <p class="final-text">
+                We are fragments of eternity, brief candles in an infinite darkness, yet in our burning we illuminate truths that outlast empires. Each life a sentence in the great book of being, each moment a note in the symphony that plays beyond time's beginning and end.
+            </p>
+            <div class="generated-haiku" id="generatedHaiku"></div>
+        </div>
+        
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator">
+        <div class="scroll-line"></div>
+        <div class="scroll-text">Scroll</div>
+    </div>
+    
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Global variables
+        let scene, camera, renderer, particles;
+        let isBreathing = false;
+        let breathCycle = 0;
+        let holdProgress = 0;
+        let holdInterval;
+        let currentTheme = '';
+        let userData = {
+            startTime: Date.now(),
+            scrollDistance: 0,
+            lastScrollY: 0,
+            holdCompleted: false,
+            breathCompleted: false,
+            emotionalState: 'neutral',
+            cursorSpeedHistory: [],
+            timeSpent: {}
+        };
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', init);
+        
+        function init() {
+            console.log('Initializing with interactive features...');
+            setupCustomCursor();
+            setupWebGL();
+            setupTheme();
+            setupScrollAnimations();
+            setupInteractions();
+            createFloatingParticles();
+            createHeatmap();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    showScrollIndicator();
+                    
+                    // Track time spent on page
+                    userData.startTime = Date.now();
+                    
+                    // Refresh ScrollTrigger after DOM is ready
+                    setTimeout(() => {
+                        ScrollTrigger.refresh();
+                        console.log('ScrollTrigger refreshed after page load');
+                    }, 500);
+                }, 2000);
+            }, 3000);
+        }
+        
+        // Custom Cursor with Emotional Detection
+        function setupCustomCursor() {
+            const cursor = document.getElementById('cursor');
+            const cursorGlow = document.getElementById('cursorGlow');
+            let mouseX = 0, mouseY = 0;
+            let lastX = 0, lastY = 0, lastTime = 0;
+            
+            if (!cursor || !cursorGlow) return;
+            
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                // Calculate cursor speed
+                const now = Date.now();
+                if (lastTime > 0) {
+                    const deltaTime = now - lastTime;
+                    const deltaX = e.clientX - lastX;
+                    const deltaY = e.clientY - lastY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    const speed = distance / deltaTime; // pixels per millisecond
+                    
+                    // Store for emotional state calculation
+                    userData.cursorSpeedHistory.push(speed);
+                    if (userData.cursorSpeedHistory.length > 20) {
+                        userData.cursorSpeedHistory.shift();
+                    }
+                    
+                    updateEmotionalState();
+                }
+                
+                lastX = e.clientX;
+                lastY = e.clientY;
+                lastTime = now;
+                
+                // Gaze tracking effects
+                const gazeElements = document.querySelectorAll('.gaze-responsive');
+                gazeElements.forEach(element => {
+                    const rect = element.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    const deltaX = (e.clientX - centerX) * 0.02;
+                    const deltaY = (e.clientY - centerY) * 0.02;
+                    
+                    element.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                });
+            });
+            
+            function updateCursor() {
+                if (cursor) {
+                    cursor.style.left = mouseX + 'px';
+                    cursor.style.top = mouseY + 'px';
+                }
+                if (cursorGlow) {
+                    cursorGlow.style.left = mouseX + 'px';
+                    cursorGlow.style.top = mouseY + 'px';
+                }
+                
+                requestAnimationFrame(updateCursor);
+            }
+            
+            updateCursor();
+        }
+        
+        // Update emotional state based on cursor speed
+        function updateEmotionalState() {
+            if (userData.cursorSpeedHistory.length < 5) return;
+            
+            const avgSpeed = userData.cursorSpeedHistory.reduce((a, b) => a + b, 0) / userData.cursorSpeedHistory.length;
+            let newState = 'neutral';
+            
+            if (avgSpeed < 0.1) {
+                newState = 'calm';
+            } else if (avgSpeed > 0.3) {
+                newState = 'anxious';
+            }
+            
+            if (newState !== userData.emotionalState) {
+                userData.emotionalState = newState;
+                document.body.className = '';
+                document.body.classList.add(userData.emotionalState + '-state');
+                
+                // Add theme class if we have one
+                if (currentTheme) {
+                    document.body.classList.add(currentTheme + '-theme');
+                }
+                
+                console.log(`Emotional state changed to: ${userData.emotionalState}`);
+            }
+        }
+        
+        // WebGL Background with Emotional Response
+        function setupWebGL() {
+            const canvas = document.getElementById('webgl-canvas');
+            if (!canvas) return;
+            
+            try {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                
+                // Create floating particles
+                const particleCount = 300;
+                const particleGeometry = new THREE.BufferGeometry();
+                const particlePositions = new Float32Array(particleCount * 3);
+                
+                for (let i = 0; i < particleCount * 3; i += 3) {
+                    particlePositions[i] = (Math.random() - 0.5) * 20;
+                    particlePositions[i + 1] = (Math.random() - 0.5) * 20;
+                    particlePositions[i + 2] = (Math.random() - 0.5) * 20;
+                }
+                
+                particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+                
+                const particleMaterial = new THREE.PointsMaterial({
+                    color: 0xffffff,
+                    size: 0.02,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                
+                particles = new THREE.Points(particleGeometry, particleMaterial);
+                scene.add(particles);
+                
+                camera.position.z = 5;
+                
+                function animateWebGL() {
+                    requestAnimationFrame(animateWebGL);
+                    
+                    if (particles) {
+                        // Base rotation speed based on emotional state
+                        let rotationSpeed = 0.002;
+                        if (userData.emotionalState === 'calm') {
+                            rotationSpeed = 0.0005;
+                        } else if (userData.emotionalState === 'anxious') {
+                            rotationSpeed = 0.005;
+                        }
+                        
+                        particles.rotation.x += rotationSpeed;
+                        particles.rotation.y += rotationSpeed * 2;
+                        
+                        // Respond to scroll
+                        const scrollProgress = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+                        particles.rotation.z = scrollProgress * Math.PI * 2;
+                        
+                        // Update debug indicator
+                        document.getElementById('debugIndicator').textContent = 
+                            `Scroll: ${Math.round(scrollProgress * 100)}% | State: ${userData.emotionalState}`;
+                    }
+                    
+                    renderer.render(scene, camera);
+                }
+                
+                animateWebGL();
+                
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    ScrollTrigger.refresh();
+                });
+            } catch (error) {
+                console.warn('WebGL not supported:', error);
+            }
+        }
+        
+        // Setup theme based on time of day
+        function setupTheme() {
+            const hour = new Date().getHours();
+            const body = document.body;
+            
+            if (hour >= 5 && hour < 12) {
+                body.classList.add('day-theme');
+                currentTheme = 'day';
+            } else if (hour >= 12 && hour < 18) {
+                body.classList.add('day-theme');
+                currentTheme = 'day';
+            } else if (hour >= 18 && hour < 21) {
+                body.classList.add('evening-theme');
+                currentTheme = 'evening';
+            } else {
+                body.classList.add('night-theme');
+                currentTheme = 'night';
+            }
+            
+            console.log(`Theme set to: ${currentTheme}`);
+        }
+        
+        // Setup animations with ScrollTrigger
+        function setupScrollAnimations() {
+            // Title animations
+            gsap.to('.title-main', {
+                scrollTrigger: {
+                    trigger: '#titleFragment',
+                    start: 'top center',
+                    end: 'bottom center',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                y: 0,
+                duration: 2,
+                ease: 'power4.out'
+            });
+            
+            gsap.to('.title-subtitle', {
+                scrollTrigger: {
+                    trigger: '#titleFragment',
+                    start: 'top center',
+                    end: 'bottom center',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                y: 0,
+                duration: 2,
+                delay: 0.3,
+                ease: 'power4.out'
+            });
+            
+            // Memory animations
+            const fragments = [
+                '#memoryFragment1', '#memoryFragment2', '#memoryFragment3'
+            ];
+            
+            fragments.forEach(fragment => {
+                gsap.to(`${fragment} .memory-title`, {
+                    scrollTrigger: {
+                        trigger: fragment,
+                        start: 'top 80%',
+                        end: 'bottom 20%',
+                        scrub: 0.5,
+                    },
+                    opacity: 1,
+                    x: 0,
+                    duration: 1.5,
+                    ease: 'power3.out'
+                });
+                
+                gsap.to(`${fragment} .memory-body`, {
+                    scrollTrigger: {
+                        trigger: fragment,
+                        start: 'top 70%',
+                        end: 'bottom 20%',
+                        scrub: 0.5,
+                    },
+                    opacity: 1,
+                    x: 0,
+                    duration: 1.5,
+                    delay: 0.2,
+                    ease: 'power3.out',
+                    onComplete: function() {
+                        // Add liquid text effect to key words
+                        const text = document.querySelector(`${fragment} .memory-body`);
+                        if (text) {
+                            const words = text.innerHTML.split(' ');
+                            const newText = words.map(word => {
+                                if (word.length > 5 && Math.random() > 0.7) {
+                                    return `<span class="liquid-text">${word}</span>`;
+                                }
+                                return word;
+                            }).join(' ');
+                            text.innerHTML = newText;
+                        }
+                    }
+                });
+                
+                gsap.to(`${fragment} .memory-visual`, {
+                    scrollTrigger: {
+                        trigger: fragment,
+                        start: 'top 80%',
+                        end: 'bottom 20%',
+                        scrub: 0.5,
+                    },
+                    opacity: 1,
+                    scale: 1,
+                    duration: 1.5,
+                    ease: 'power3.out'
+                });
+            });
+            
+            // Revelation animations
+            gsap.to('.revelation-prompt', {
+                scrollTrigger: {
+                    trigger: '#revelationFragment',
+                    start: 'top 80%',
+                    end: 'bottom 20%',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                duration: 1,
+                ease: 'power2.out'
+            });
+            
+            gsap.to('.hold-to-reveal', {
+                scrollTrigger: {
+                    trigger: '#revelationFragment',
+                    start: 'top 80%',
+                    end: 'bottom 20%',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                duration: 1,
+                ease: 'power2.out'
+            });
+            
+            // Breath animations
+            gsap.to('.breath-instruction', {
+                scrollTrigger: {
+                    trigger: '#breathFragment',
+                    start: 'top 80%',
+                    end: 'bottom 20%',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                duration: 1,
+                ease: 'power2.out'
+            });
+            
+            gsap.to('.breath-circle', {
+                scrollTrigger: {
+                    trigger: '#breathFragment',
+                    start: 'top 80%',
+                    end: 'bottom 20%',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                duration: 1,
+                ease: 'power2.out'
+            });
+            
+            // Time cards animations
+            gsap.to('.time-card', {
+                scrollTrigger: {
+                    trigger: '#timeFragment',
+                    start: 'top 80%',
+                    end: 'bottom 20%',
+                    scrub: 0.5,
+                    stagger: 0.1,
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: 'power2.out'
+            });
+            
+            // Final text animation
+            gsap.to('.final-text', {
+                scrollTrigger: {
+                    trigger: '#finalFragment',
+                    start: 'top 80%',
+                    end: 'bottom 20%',
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                y: 0,
+                duration: 2,
+                ease: 'power4.out',
+                onComplete: generateHaiku
+            });
+            
+            // Time dilation effect
+            ScrollTrigger.create({
+                trigger: "#timeFragment",
+                start: "top center",
+                end: "bottom center",
+                onEnter: () => {
+                    document.querySelectorAll('.time-dilation').forEach(card => {
+                        card.classList.add('time-dilation-active');
+                    });
+                },
+                onLeave: () => {
+                    document.querySelectorAll('.time-dilation').forEach(card => {
+                        card.classList.remove('time-dilation-active');
+                    });
+                },
+                onEnterBack: () => {
+                    document.querySelectorAll('.time-dilation').forEach(card => {
+                        card.classList.add('time-dilation-active');
+                    });
+                },
+                onLeaveBack: () => {
+                    document.querySelectorAll('.time-dilation').forEach(card => {
+                        card.classList.remove('time-dilation-active');
+                    });
+                }
+            });
+            
+            // Refresh ScrollTrigger after setting up
+            setTimeout(() => {
+                ScrollTrigger.refresh();
+                console.log('ScrollTrigger refreshed after animations setup');
+            }, 1000);
+        }
+        
+        // Setup interactions
+        function setupInteractions() {
+            // Hold to reveal
+            const holdCircle = document.getElementById('holdCircle');
+            const holdProgress = document.getElementById('holdProgress');
+            const revealedText = document.getElementById('revealedText');
+            
+            if (holdCircle && holdProgress && revealedText) {
+                let holdStart = 0;
+                let holdActive = false;
+                
+                holdCircle.addEventListener('mousedown', () => {
+                    holdActive = true;
+                    holdStart = Date.now();
+                    holdInterval = setInterval(() => {
+                        const elapsed = Date.now() - holdStart;
+                        const progress = Math.min(elapsed / 2000, 1);
+                        
+                        holdProgress.style.background = `conic-gradient(from 0deg, transparent 0deg, rgba(255, 255, 255, 0.8) ${progress * 360}deg, transparent ${progress * 360}deg)`;
+                        
+                        if (progress >= 1) {
+                            clearInterval(holdInterval);
+                            gsap.to(revealedText, {
+                                opacity: 1,
+                                scale: 1,
+                                duration: 1,
+                                ease: 'elastic.out(1, 0.3)'
+                            });
+                            holdCircle.style.opacity = '0';
+                            holdCircle.style.pointerEvents = 'none';
+                            userData.holdCompleted = true;
+                        }
+                    }, 50);
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    if (holdActive) {
+                        holdActive = false;
+                        clearInterval(holdInterval);
+                        holdProgress.style.background = `conic-gradient(from 0deg, transparent 0deg, rgba(255, 255, 255, 0.8) 0deg, transparent 0deg)`;
+                    }
+                });
+            }
+            
+            // Breath interaction
+            const breathInner = document.getElementById('breathInner');
+            const breathPrompt = document.getElementById('breathPrompt');
+            
+            if (breathInner && breathPrompt) {
+                breathPrompt.addEventListener('click', () => {
+                    if (isBreathing) return;
+                    
+                    isBreathing = true;
+                    breathPrompt.textContent = "Breathe in...";
+                    
+                    // Breathing animation
+                    gsap.to(breathInner, {
+                        width: '280px',
+                        height: '280px',
+                        duration: 4,
+                        ease: 'sine.inOut',
+                        onComplete: () => {
+                            breathPrompt.textContent = "Hold...";
+                            setTimeout(() => {
+                                breathPrompt.textContent = "Breathe out...";
+                                gsap.to(breathInner, {
+                                    width: '100px',
+                                    height: '100px',
+                                    duration: 6,
+                                    ease: 'sine.inOut',
+                                    onComplete: () => {
+                                        breathPrompt.textContent = "Breathe with the ages";
+                                        setTimeout(() => {
+                                            isBreathing = false;
+                                            breathPrompt.textContent = "Click to begin again";
+                                            userData.breathCompleted = true;
+                                        }, 2000);
+                                    }
+                                });
+                            }, 1000);
+                        }
+                    });
+                });
+            }
+            
+            // Audio zones
+            const audioZones = document.querySelectorAll('.audio-zone');
+            audioZones.forEach(zone => {
+                zone.addEventListener('mouseenter', () => {
+                    const soundType = zone.getAttribute('data-sound');
+                    console.log(`Playing ${soundType} sound`);
+                    // In a real implementation, we'd play actual sounds here
+                    gsap.to(zone, {
+                        scale: 1.5,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+                
+                zone.addEventListener('mouseleave', () => {
+                    gsap.to(zone, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            });
+        }
+        
+        // Create floating particles in the background
+        function createFloatingParticles() {
+            const particleCount = 50;
+            const container = document.body;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random size
+                const size = Math.random() * 3 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random opacity
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                // Random animation
+                const duration = Math.random() * 20 + 10;
+                particle.style.animation = `float ${duration}s infinite ease-in-out`;
+                
+                // Keyframes for floating animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes float {
+                        0% {
+                            transform: translate(0, 0) rotate(0deg);
+                        }
+                        25% {
+                            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 90}deg);
+                        }
+                        50% {
+                            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 180}deg);
+                        }
+                        75% {
+                            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 270}deg);
+                        }
+                        100% {
+                            transform: translate(0, 0) rotate(360deg);
+                        }
+                    }
+                `;
+                
+                document.head.appendChild(style);
+                container.appendChild(particle);
+            }
+        }
+        
+        // Create heatmap overlay
+        function createHeatmap() {
+            const heatmapOverlay = document.getElementById('heatmapOverlay');
+            if (!heatmapOverlay) return;
+            
+            // Mock data for popular areas
+            const popularAreas = [
+                { x: 30, y: 50, intensity: 0.8 }, // Title fragment
+                { x: 25, y: 70, intensity: 0.6 }, // Memory fragment 1
+                { x: 75, y: 65, intensity: 0.7 }, // Memory fragment 2
+                { x: 50, y: 40, intensity: 0.9 }, // Revelation fragment
+                { x: 50, y: 50, intensity: 0.7 }, // Breath fragment
+                { x: 45, y: 60, intensity: 0.5 }  // Final fragment
+            ];
+            
+            popularAreas.forEach(area => {
+                const point = document.createElement('div');
+                point.classList.add('heatmap-point');
+                point.style.left = `${area.x}%`;
+                point.style.top = `${area.y}%`;
+                point.style.width = `${area.intensity * 150 + 50}px`;
+                point.style.height = `${area.intensity * 150 + 50}px`;
+                point.style.opacity = area.intensity * 0.5;
+                
+                heatmapOverlay.appendChild(point);
+            });
+        }
+        
+        // Generate haiku based on user journey
+        function generateHaiku() {
+            const timeSpent = (Date.now() - userData.startTime) / 1000; // in seconds
+            const haikuElement = document.getElementById('generatedHaiku');
+            if (!haikuElement) return;
+            
+            // Word banks
+            const themes = [
+                "Eternal cycles",
+                "Fleeting moments",
+                "Whispers of time",
+                "Memory's embrace",
+                "Endless becoming"
+            ];
+            
+            const actions = [
+                "Dance in the twilight",
+                "Flow like ancient rivers",
+                "Echo through ages",
+                "Burn like brief candles",
+                "Weave through the cosmos"
+            ];
+            
+            const resolutions = [
+                "In timeless embrace",
+                "Beyond all horizons",
+                "In cosmic rhythm",
+                "Through infinite night",
+                "As stardust returns"
+            ];
+            
+            // Select based on user behavior
+            let themeIndex, actionIndex, resolutionIndex;
+            
+            if (timeSpent < 60) {
+                themeIndex = 0;
+            } else if (timeSpent < 120) {
+                themeIndex = 1;
+            } else {
+                themeIndex = 2;
+            }
+            
+            if (userData.holdCompleted) {
+                actionIndex = 0;
+            } else {
+                actionIndex = 1;
+            }
+            
+            if (userData.breathCompleted) {
+                resolutionIndex = 0;
+            } else {
+                resolutionIndex = 1;
+            }
+            
+            // Construct haiku
+            const haiku = `
+                ${themes[themeIndex]}\n
+                ${actions[actionIndex]}\n
+                ${resolutions[resolutionIndex]}
+            `;
+            
+            haikuElement.textContent = haiku;
+            
+            // Animate in
+            gsap.to(haikuElement, {
+                opacity: 1,
+                y: 0,
+                duration: 2,
+                delay: 0.5,
+                ease: 'power2.out'
+            });
+        }
+        
+        // Show scroll indicator
+        function showScrollIndicator() {
+            const indicator = document.getElementById('scrollIndicator');
+            if (indicator) {
+                gsap.to(indicator, {
+                    opacity: 1,
+                    duration: 1,
+                    delay: 1
+                });
+                
+                // Hide when user starts scrolling
+                window.addEventListener('scroll', () => {
+                    gsap.to(indicator, {
+                        opacity: 0,
+                        duration: 0.5
+                    });
+                }, { once: true });
+            }
+        }
+    </script>
+</body>
+</html>
